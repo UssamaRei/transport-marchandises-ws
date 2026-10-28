@@ -1,0 +1,777 @@
+openapi: 3.0.3
+info:
+  title: API transports
+  version: 0.1.0
+  description: Proposition de contrat pour le projet Web Services. Les endpoints restent a implementer et a valider
+    en equipe.
+servers:
+- url: http://localhost:8084
+  description: Depuis le PC
+- url: http://transports:8080
+  description: Entre conteneurs Compose
+paths:
+  /health:
+    get:
+      operationId: API_transports_get_health
+      summary: Sante du processus et de sa base locale
+      x-consumers:
+      - outils
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        '503':
+          $ref: '#/components/responses/503'
+      description: Ne pas appeler les autres backends pour repondre a ce controle local.
+  /api/v1/transports:
+    post:
+      operationId: API_transports_post_transports
+      summary: Planifier a partir dun bon et reserver le camion
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - $ref: '#/components/parameters/Idempotency'
+      responses:
+        '201':
+          description: Ressource creee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transport'
+          headers:
+            Location:
+              description: URL relative de la ressource creee
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '422':
+          $ref: '#/components/responses/422'
+        '503':
+          $ref: '#/components/responses/503'
+        '202':
+          description: Operation persistante encore en cours de confirmation distante
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transport'
+          headers:
+            Location:
+              schema:
+                type: string
+              description: URL du transport a consulter
+      description: 'Bon EMIS requis. Enregistrer PREPARATION avant reservation. 201 si reservation confirmee, 202
+        si resultat encore incertain. Refus explicite : 409 ou 422 avec transportId dans details si intention deja
+        creee. Un transport non ANNULE par bon.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransportCreate'
+    get:
+      operationId: API_transports_get_transports
+      summary: Lire les transports sans appeler un autre service
+      x-consumers:
+      - flotte
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: query
+        name: camionId
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      - in: query
+        name: bonId
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      - in: query
+        name: statut
+        required: false
+        schema:
+          type: string
+          enum:
+          - PREPARATION
+          - PLANIFIE
+          - EN_COURS
+          - CLOTURE_EN_ATTENTE
+          - LIVRE
+          - ANNULATION_EN_ATTENTE
+          - ANNULE
+      - in: query
+        name: actifs
+        required: false
+        schema:
+          type: boolean
+        description: true exclut uniquement LIVRE et ANNULE ; false selectionne les etats terminaux.
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransportsPage'
+        '400':
+          $ref: '#/components/responses/400'
+        '503':
+          $ref: '#/components/responses/503'
+  /api/v1/transports/{id}:
+    get:
+      operationId: API_transports_get_transports_id
+      summary: Lire le statut et la synchronisation du transport
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transport'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '503':
+          $ref: '#/components/responses/503'
+  /api/v1/transports/{id}/depart:
+    post:
+      operationId: API_transports_post_transports_id_depart
+      summary: Demarrer un transport PLANIFIE
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transport'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '422':
+          $ref: '#/components/responses/422'
+        '503':
+          $ref: '#/components/responses/503'
+      description: Reservation confirmee obligatoire. Cree aussi un evenement DEPART. Interdit durant annulation
+        ou cloture.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartInput'
+  /api/v1/transports/{id}/evenements:
+    get:
+      operationId: API_transports_get_transports_id_evenements
+      summary: Lire la chronologie
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvenementsPage'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '503':
+          $ref: '#/components/responses/503'
+      description: 'Ordre : dateEvenement puis id.'
+    post:
+      operationId: API_transports_post_transports_id_evenements
+      summary: Ajouter un pointage ou un commentaire
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      responses:
+        '201':
+          description: Ressource creee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evenement'
+          headers:
+            Location:
+              description: URL relative de la ressource creee
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '422':
+          $ref: '#/components/responses/422'
+        '503':
+          $ref: '#/components/responses/503'
+      description: Les types DEPART et ARRIVEE sont reserves aux transitions metier et non acceptes dans ce corps
+        manuel.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvenementCreate'
+  /api/v1/transports/{id}/livraison:
+    post:
+      operationId: API_transports_post_transports_id_livraison
+      summary: Confirmer la livraison chez Bons puis liberer le camion
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      - $ref: '#/components/parameters/Idempotency'
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transport'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '422':
+          $ref: '#/components/responses/422'
+        '503':
+          $ref: '#/components/responses/503'
+        '202':
+          description: Operation persistante encore en cours de confirmation distante
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transport'
+          headers:
+            Location:
+              schema:
+                type: string
+              description: URL du transport a consulter
+      description: EN_COURS requis et arriveeReelle >= departReel. Conserver la preuve avant les appels. LIVRE seulement
+        apres preuve et liberation confirmees, sinon CLOTURE_EN_ATTENTE. Rejouer sans doubler les effets.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LivraisonInput'
+  /api/v1/transports/{id}/annulation:
+    post:
+      operationId: API_transports_post_transports_id_annulation
+      summary: Annuler avant le depart et liberer la reservation
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      - $ref: '#/components/parameters/Idempotency'
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transport'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '422':
+          $ref: '#/components/responses/422'
+        '503':
+          $ref: '#/components/responses/503'
+        '202':
+          description: Operation persistante encore en cours de confirmation distante
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transport'
+          headers:
+            Location:
+              schema:
+                type: string
+              description: URL du transport a consulter
+      description: Seulement PREPARATION ou PLANIFIE. Si reservation incertaine, resoudre sa demande initiale avant
+        liberation. ANNULE seulement apres resultat certain ; sinon ANNULATION_EN_ATTENTE.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnnulationInput'
+  /api/v1/transports/{id}/reconciliation:
+    post:
+      operationId: API_transports_post_transports_id_reconciliation
+      summary: Reprendre les confirmations manquantes
+      x-consumers:
+      - UI interne
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transport'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '503':
+          $ref: '#/components/responses/503'
+        '202':
+          description: Operation persistante encore en cours de confirmation distante
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transport'
+          headers:
+            Location:
+              schema:
+                type: string
+              description: URL du transport a consulter
+      description: Utiliser les cles initiales et les etapes persistees. Verrouiller ou versionner le transport.
+        Ne pas creer de nouvelle intention pour un simple retry.
+components:
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+        correlationId:
+          type: string
+      required:
+      - code
+      - message
+      - correlationId
+    Health:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+          - ok
+      required:
+      - status
+    Destinataire:
+      type: object
+      additionalProperties: false
+      properties:
+        nom:
+          type: string
+          minLength: 1
+          maxLength: 160
+        telephone:
+          type: string
+          maxLength: 40
+      required:
+      - nom
+    TransportCreate:
+      type: object
+      additionalProperties: false
+      properties:
+        bonId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        departPrevu:
+          type: string
+          format: date-time
+      required:
+      - bonId
+      - departPrevu
+    DepartInput:
+      type: object
+      additionalProperties: false
+      properties:
+        departReel:
+          type: string
+          format: date-time
+      required:
+      - departReel
+    LivraisonInput:
+      type: object
+      additionalProperties: false
+      properties:
+        arriveeReelle:
+          type: string
+          format: date-time
+        recepteur:
+          type: string
+          minLength: 1
+          maxLength: 160
+        commentaire:
+          type: string
+          maxLength: 1000
+      required:
+      - arriveeReelle
+      - recepteur
+    AnnulationInput:
+      type: object
+      additionalProperties: false
+      properties:
+        motif:
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - motif
+    Transport:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        bonId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        camionId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        reservationId:
+          type: string
+          minLength: 1
+          maxLength: 64
+          nullable: true
+        poidsKg:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          description: Poids en kg ; calculs en decimal.
+        destination:
+          type: string
+        departPrevu:
+          type: string
+          format: date-time
+        departReel:
+          type: string
+          format: date-time
+          nullable: true
+        arriveeReelle:
+          type: string
+          format: date-time
+          nullable: true
+        statut:
+          type: string
+          enum:
+          - PREPARATION
+          - PLANIFIE
+          - EN_COURS
+          - CLOTURE_EN_ATTENTE
+          - LIVRE
+          - ANNULATION_EN_ATTENTE
+          - ANNULE
+        syncEtat:
+          type: string
+          enum:
+          - OK
+          - A_REPRENDRE
+        derniereErreur:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+      - id
+      - bonId
+      - camionId
+      - reservationId
+      - poidsKg
+      - destination
+      - departPrevu
+      - statut
+      - syncEtat
+      - createdAt
+      example:
+        id: TRP-001
+        bonId: BL-001
+        camionId: CAM-001
+        reservationId: RES-001
+        poidsKg: 8000
+        destination: Entrepot, Casablanca
+        departPrevu: '2026-11-10T09:00:00Z'
+        statut: PLANIFIE
+        syncEtat: OK
+        createdAt: '2026-11-10T08:30:00Z'
+    EvenementCreate:
+      type: object
+      additionalProperties: false
+      properties:
+        type:
+          type: string
+          enum:
+          - POINTAGE
+          - COMMENTAIRE
+        description:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        dateEvenement:
+          type: string
+          format: date-time
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+      required:
+      - type
+      - description
+      - dateEvenement
+    Evenement:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        transportId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        type:
+          type: string
+          enum:
+          - DEPART
+          - POINTAGE
+          - ARRIVEE
+          - COMMENTAIRE
+        description:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        dateEvenement:
+          type: string
+          format: date-time
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+      required:
+      - id
+      - transportId
+      - type
+      - description
+      - dateEvenement
+    TransportsPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transport'
+        page:
+          type: integer
+          minimum: 1
+        size:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total:
+          type: integer
+          minimum: 0
+      required:
+      - items
+      - page
+      - size
+      - total
+    EvenementsPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Evenement'
+        page:
+          type: integer
+          minimum: 1
+        size:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total:
+          type: integer
+          minimum: 0
+      required:
+      - items
+      - page
+      - size
+      - total
+  parameters:
+    Page:
+      in: query
+      name: page
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Size:
+      in: query
+      name: size
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    Correlation:
+      in: header
+      name: X-Correlation-Id
+      required: false
+      schema:
+        type: string
+        maxLength: 160
+      description: Identifiant de trace propage aux appels sortants.
+    Idempotency:
+      in: header
+      name: Idempotency-Key
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 160
+      description: Cle stable pour un rejeu ; meme cle et autre methode, chemin ou corps = 409.
+  responses:
+    '400':
+      description: Requete mal formee
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Ressource absente
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '409':
+      description: Conflit de doublon ou etat incompatible
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '422':
+      description: Donnees metier invalides
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '503':
+      description: Service ou dependance temporairement indisponible
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

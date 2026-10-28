@@ -1,0 +1,67 @@
+[
+  {
+    "name": "01-parcours",
+    "document": "README.md",
+    "index": 0
+  },
+  {
+    "name": "02-architecture",
+    "document": "docs/02-architecture.md",
+    "index": 0
+  },
+  {
+    "name": "03-classes-globales",
+    "document": "docs/03-modele-donnees.md",
+    "index": 0
+  },
+  {
+    "name": "04-sequence",
+    "document": "docs/04-communication-api.md",
+    "index": 0
+  },
+  {
+    "name": "05-classes-flotte",
+    "document": "services/flotte/README.md",
+    "index": 0
+  },
+  {
+    "name": "06-classes-chargements",
+    "document": "services/chargements/README.md",
+    "index": 0
+  },
+  {
+    "name": "07-classes-bons",
+    "document": "services/bons/README.md",
+    "index": 0
+  },
+  {
+    "name": "08-classes-transports",
+    "document": "services/transports/README.md",
+    "index": 0
+  },
+  {
+    "name": "09-etats-transports",
+    "document": "services/transports/README.md",
+    "index": 1
+  },
+  {
+    "name": "10-erd-flotte",
+    "document": "docs/diagrams/modeles-relationnels.md",
+    "index": 0
+  },
+  {
+    "name": "11-erd-chargements",
+    "document": "docs/diagrams/modeles-relationnels.md",
+    "index": 1
+  },
+  {
+    "name": "12-erd-bons",
+    "document": "docs/diagrams/modeles-relationnels.md",
+    "index": 2
+  },
+  {
+    "name": "13-erd-transports",
+    "document": "docs/diagrams/modeles-relationnels.md",
+    "index": 3
+  }
+]

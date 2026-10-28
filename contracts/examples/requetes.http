@@ -1,0 +1,74 @@
+# Exemples de requetes, pas un test automatiquement execute.
+# Remplacer les IDs ci-dessous par les valeurs retournees par les vrais serveurs.
+# Chaque Idempotency-Key reste stable pour un retry du MEME corps.
+# Pour une nouvelle operation volontaire, choisir une nouvelle cle.
+@flotte = http://localhost:8081/api/v1
+@chargements = http://localhost:8082/api/v1
+@bons = http://localhost:8083/api/v1
+@transports = http://localhost:8084/api/v1
+@camionId = CAM-001
+@chargementId = CHG-001
+@bonId = BL-001
+@transportId = TRP-001
+
+### 1. Creer un camion ; relever son id dans la reponse
+POST {{flotte}}/camions
+Content-Type: application/json
+X-Correlation-Id: demo-001
+
+{"immatriculation":"12345-A-1","capaciteKg":10000}
+
+### 2. Creer un brouillon ; relever son id
+POST {{chargements}}/chargements
+Content-Type: application/json
+X-Correlation-Id: demo-001
+
+{"origine":"Depot, Rabat","destination":"Entrepot, Casablanca","destinataire":{"nom":"Client A","telephone":"0600000000"},"camionSouhaiteId":"{{camionId}}"}
+
+### 3. Ajouter 160 sacs de 50 kg
+POST {{chargements}}/chargements/{{chargementId}}/lignes
+Content-Type: application/json
+
+{"designation":"Sacs de ciment","quantite":160,"poidsUnitaireKg":50}
+
+### 4. Valider : le backend Chargements appelle Flotte
+POST {{chargements}}/chargements/{{chargementId}}/validation
+
+### 5. Emettre le bon : le backend Bons appelle Chargements
+POST {{bons}}/bons
+Content-Type: application/json
+Idempotency-Key: demo-bon-essai1
+
+{"chargementId":"{{chargementId}}"}
+
+### 6. Planifier : Transports appelle Bons puis Flotte ; relever son id
+POST {{transports}}/transports
+Content-Type: application/json
+Idempotency-Key: demo-transport-essai1
+
+{"bonId":"{{bonId}}","departPrevu":"2026-11-10T09:00:00Z"}
+
+### 7. Depart
+POST {{transports}}/transports/{{transportId}}/depart
+Content-Type: application/json
+
+{"departReel":"2026-11-10T09:05:00Z"}
+
+### 8. Livraison : Transports depose la preuve puis libere le camion
+POST {{transports}}/transports/{{transportId}}/livraison
+Content-Type: application/json
+Idempotency-Key: demo-livraison-essai1
+
+{"arriveeReelle":"2026-11-10T12:00:00Z","recepteur":"Mme Amrani","commentaire":"Reception complete"}
+
+### 9. Consulter le resultat ; si etat en attente, utiliser la reconciliation
+GET {{transports}}/transports/{{transportId}}
+
+### 10. Reprendre les etapes distantes manquantes si necessaire
+POST {{transports}}/transports/{{transportId}}/reconciliation
+
+### 11. Maintenance : Flotte appelle la liste locale de Transports
+POST {{flotte}}/camions/{{camionId}}/maintenance
+Content-Type: application/json
+
+{"motif":"Controle apres livraison"}

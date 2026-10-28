@@ -1,0 +1,24 @@
+{
+  "id": "BL-001",
+  "numero": "BL-2026-0001",
+  "chargementId": "CHG-001",
+  "camionSouhaiteId": "CAM-001",
+  "origine": "Depot, Rabat",
+  "destination": "Entrepot, Casablanca",
+  "destinataire": {
+    "nom": "Client A",
+    "telephone": "0600000000"
+  },
+  "poidsTotalKg": 8000,
+  "statut": "EMIS",
+  "createdAt": "2026-11-10T08:20:00Z",
+  "lignes": [
+    {
+      "id": "LB-001",
+      "bonId": "BL-001",
+      "designation": "Sacs de ciment",
+      "quantite": 160,
+      "poidsUnitaireKg": 50
+    }
+  ]
+}

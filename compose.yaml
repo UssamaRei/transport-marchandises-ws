@@ -1,0 +1,58 @@
+# Infrastructure de demarrage : 4 BASES uniquement, aucun backend metier.
+# PostgreSQL est une proposition remplaçable par les choix de l'equipe.
+x-db: &db
+  image: postgres:17
+  restart: unless-stopped
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+    interval: 5s
+    timeout: 3s
+    retries: 12
+
+services:
+  db-flotte:
+    <<: *db
+    environment:
+      POSTGRES_USER: flotte
+      POSTGRES_PASSWORD: ${FLEET_DB_PASSWORD:?Copier .env.example vers .env}
+      POSTGRES_DB: flotte
+    ports: ["127.0.0.1:5433:5432"]
+    volumes:
+      - flotte-data:/var/lib/postgresql/data
+      - ./services/flotte/data/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+  db-chargements:
+    <<: *db
+    environment:
+      POSTGRES_USER: chargements
+      POSTGRES_PASSWORD: ${LOAD_DB_PASSWORD:?Copier .env.example vers .env}
+      POSTGRES_DB: chargements
+    ports: ["127.0.0.1:5434:5432"]
+    volumes:
+      - chargements-data:/var/lib/postgresql/data
+      - ./services/chargements/data/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+  db-bons:
+    <<: *db
+    environment:
+      POSTGRES_USER: bons
+      POSTGRES_PASSWORD: ${BONS_DB_PASSWORD:?Copier .env.example vers .env}
+      POSTGRES_DB: bons
+    ports: ["127.0.0.1:5435:5432"]
+    volumes:
+      - bons-data:/var/lib/postgresql/data
+      - ./services/bons/data/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+  db-transports:
+    <<: *db
+    environment:
+      POSTGRES_USER: transports
+      POSTGRES_PASSWORD: ${TRIP_DB_PASSWORD:?Copier .env.example vers .env}
+      POSTGRES_DB: transports
+    ports: ["127.0.0.1:5436:5432"]
+    volumes:
+      - transports-data:/var/lib/postgresql/data
+      - ./services/transports/data/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+
+volumes:
+  flotte-data:
+  chargements-data:
+  bons-data:
+  transports-data:

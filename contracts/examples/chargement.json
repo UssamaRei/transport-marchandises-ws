@@ -1,0 +1,23 @@
+{
+  "id": "CHG-001",
+  "origine": "Depot, Rabat",
+  "destination": "Entrepot, Casablanca",
+  "destinataire": {
+    "nom": "Client A",
+    "telephone": "0600000000"
+  },
+  "camionSouhaiteId": "CAM-001",
+  "poidsTotalKg": 8000,
+  "statut": "VALIDE",
+  "version": 2,
+  "createdAt": "2026-11-10T08:10:00Z",
+  "lignes": [
+    {
+      "id": "LC-001",
+      "chargementId": "CHG-001",
+      "designation": "Sacs de ciment",
+      "quantite": 160,
+      "poidsUnitaireKg": 50
+    }
+  ]
+}

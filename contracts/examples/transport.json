@@ -1,0 +1,12 @@
+{
+  "id": "TRP-001",
+  "bonId": "BL-001",
+  "camionId": "CAM-001",
+  "reservationId": "RES-001",
+  "poidsKg": 8000,
+  "destination": "Entrepot, Casablanca",
+  "departPrevu": "2026-11-10T09:00:00Z",
+  "statut": "PLANIFIE",
+  "syncEtat": "OK",
+  "createdAt": "2026-11-10T08:30:00Z"
+}

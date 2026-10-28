@@ -1,0 +1,24 @@
+erDiagram
+    TRANSPORT ||--o{ EVENEMENT_SUIVI : chronologie
+    TRANSPORT {
+      varchar id PK
+      varchar bon_id
+      varchar camion_id
+      varchar reservation_id UK
+      varchar statut
+      varchar sync_etat
+      timestamptz depart_prevu
+      timestamptz depart_reel
+      timestamptz arrivee_reelle
+      boolean preuve_confirmee
+      boolean liberation_confirmee
+    }
+    EVENEMENT_SUIVI {
+      varchar id PK
+      varchar transport_id FK
+      varchar type
+      varchar description
+      timestamptz date_evenement
+      numeric latitude
+      numeric longitude
+    }

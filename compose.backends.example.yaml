@@ -1,0 +1,42 @@
+# GABARIT : applications, migrations et Dockerfiles restent a developper.
+# Utiliser avec compose.yaml une fois les quatre services implementes :
+# docker compose -f compose.yaml -f compose.backends.example.yaml up --build -d
+# DATABASE_URL et PORT sont des conventions a adapter a chaque framework.
+services:
+  flotte:
+    build: ./services/flotte
+    ports: ["127.0.0.1:8081:8080"]
+    environment:
+      PORT: "8080"
+      DATABASE_URL: postgresql://flotte:${FLEET_DB_PASSWORD}@db-flotte:5432/flotte
+      TRANSPORTS_API_URL: http://transports:8080/api/v1
+    depends_on:
+      db-flotte: {condition: service_healthy}
+  chargements:
+    build: ./services/chargements
+    ports: ["127.0.0.1:8082:8080"]
+    environment:
+      PORT: "8080"
+      DATABASE_URL: postgresql://chargements:${LOAD_DB_PASSWORD}@db-chargements:5432/chargements
+      FLOTTE_API_URL: http://flotte:8080/api/v1
+    depends_on:
+      db-chargements: {condition: service_healthy}
+  bons:
+    build: ./services/bons
+    ports: ["127.0.0.1:8083:8080"]
+    environment:
+      PORT: "8080"
+      DATABASE_URL: postgresql://bons:${BONS_DB_PASSWORD}@db-bons:5432/bons
+      CHARGEMENTS_API_URL: http://chargements:8080/api/v1
+    depends_on:
+      db-bons: {condition: service_healthy}
+  transports:
+    build: ./services/transports
+    ports: ["127.0.0.1:8084:8080"]
+    environment:
+      PORT: "8080"
+      DATABASE_URL: postgresql://transports:${TRIP_DB_PASSWORD}@db-transports:5432/transports
+      FLOTTE_API_URL: http://flotte:8080/api/v1
+      BONS_API_URL: http://bons:8080/api/v1
+    depends_on:
+      db-transports: {condition: service_healthy}

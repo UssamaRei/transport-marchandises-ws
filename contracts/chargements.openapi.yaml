@@ -1,0 +1,659 @@
+openapi: 3.0.3
+info:
+  title: API chargements
+  version: 0.1.0
+  description: Proposition de contrat pour le projet Web Services. Les endpoints restent a implementer et a valider
+    en equipe.
+servers:
+- url: http://localhost:8082
+  description: Depuis le PC
+- url: http://chargements:8080
+  description: Entre conteneurs Compose
+paths:
+  /health:
+    get:
+      operationId: API_chargements_get_health
+      summary: Sante du processus et de sa base locale
+      x-consumers:
+      - outils
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        '503':
+          $ref: '#/components/responses/503'
+      description: Ne pas appeler les autres backends pour repondre a ce controle local.
+  /api/v1/chargements:
+    get:
+      operationId: API_chargements_get_chargements
+      summary: Lister les chargements
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: query
+        name: statut
+        required: false
+        schema:
+          type: string
+          enum:
+          - BROUILLON
+          - VALIDE
+      - in: query
+        name: destination
+        required: false
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChargementsPage'
+        '400':
+          $ref: '#/components/responses/400'
+        '503':
+          $ref: '#/components/responses/503'
+    post:
+      operationId: API_chargements_post_chargements
+      summary: Creer un brouillon de chargement
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      responses:
+        '201':
+          description: Ressource creee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chargement'
+          headers:
+            Location:
+              description: URL relative de la ressource creee
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/400'
+        '422':
+          $ref: '#/components/responses/422'
+        '503':
+          $ref: '#/components/responses/503'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChargementCreate'
+  /api/v1/chargements/{id}:
+    get:
+      operationId: API_chargements_get_chargements_id
+      summary: Lire le chargement et toutes ses lignes
+      x-consumers:
+      - bons
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chargement'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '503':
+          $ref: '#/components/responses/503'
+      description: Lecture locale sans appel a Flotte. Bons exige statut VALIDE avant emission.
+    patch:
+      operationId: API_chargements_patch_chargements_id
+      summary: Modifier un brouillon
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chargement'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '422':
+          $ref: '#/components/responses/422'
+        '503':
+          $ref: '#/components/responses/503'
+      description: Refuser les changements apres VALIDE. Incrementer version pour toute modification.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChargementPatch'
+    delete:
+      operationId: API_chargements_delete_chargements_id
+      summary: Supprimer un brouillon uniquement
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      responses:
+        '204':
+          description: Suppression effectuee
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '503':
+          $ref: '#/components/responses/503'
+  /api/v1/chargements/{id}/lignes:
+    post:
+      operationId: API_chargements_post_chargements_id_lignes
+      summary: Ajouter une ligne et recalculer le poids
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      responses:
+        '201':
+          description: Ressource creee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LigneChargement'
+          headers:
+            Location:
+              description: URL relative de la ressource creee
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '422':
+          $ref: '#/components/responses/422'
+        '503':
+          $ref: '#/components/responses/503'
+      description: Exige BROUILLON. Ligne et poidsTotalKg sont changes dans la meme transaction.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LigneCreate'
+  /api/v1/chargements/{id}/lignes/{ligneId}:
+    patch:
+      operationId: API_chargements_patch_chargements_id_lignes_ligneId
+      summary: Modifier une ligne du brouillon
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      - in: path
+        name: ligneId
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LigneChargement'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '422':
+          $ref: '#/components/responses/422'
+        '503':
+          $ref: '#/components/responses/503'
+      description: Verifier que ligneId appartient a ce chargement ; recalculer le total.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LignePatch'
+    delete:
+      operationId: API_chargements_delete_chargements_id_lignes_ligneId
+      summary: Retirer une ligne du brouillon
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      - in: path
+        name: ligneId
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      responses:
+        '204':
+          description: Suppression effectuee
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '503':
+          $ref: '#/components/responses/503'
+      description: Recalculer le total et incrementer version dans la meme transaction.
+  /api/v1/chargements/{id}/validation:
+    post:
+      operationId: API_chargements_post_chargements_id_validation
+      summary: Verifier le camion puis valider le chargement
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chargement'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '422':
+          $ref: '#/components/responses/422'
+        '503':
+          $ref: '#/components/responses/503'
+      description: Exige adresses, destinataire, camion souhaite et lignes valides. Appelle Flotte ; capacite suffisante
+        et disponibilite indicative. Verifier la version au retour puis rendre VALIDE immuable. Aucun camion nest
+        reserve ici.
+components:
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+        correlationId:
+          type: string
+      required:
+      - code
+      - message
+      - correlationId
+    Health:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+          - ok
+      required:
+      - status
+    Destinataire:
+      type: object
+      additionalProperties: false
+      properties:
+        nom:
+          type: string
+          minLength: 1
+          maxLength: 160
+        telephone:
+          type: string
+          maxLength: 40
+      required:
+      - nom
+    LigneChargement:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        chargementId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        designation:
+          type: string
+          minLength: 1
+          maxLength: 240
+        quantite:
+          type: integer
+          minimum: 1
+        poidsUnitaireKg:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          description: Poids en kg ; calculs en decimal.
+      required:
+      - id
+      - chargementId
+      - designation
+      - quantite
+      - poidsUnitaireKg
+    LigneCreate:
+      type: object
+      additionalProperties: false
+      properties:
+        designation:
+          type: string
+          minLength: 1
+          maxLength: 240
+        quantite:
+          type: integer
+          minimum: 1
+        poidsUnitaireKg:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          description: Poids en kg ; calculs en decimal.
+      required:
+      - designation
+      - quantite
+      - poidsUnitaireKg
+    LignePatch:
+      type: object
+      additionalProperties: false
+      properties:
+        designation:
+          type: string
+          minLength: 1
+          maxLength: 240
+        quantite:
+          type: integer
+          minimum: 1
+        poidsUnitaireKg:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          description: Poids en kg ; calculs en decimal.
+      minProperties: 1
+    ChargementCreate:
+      type: object
+      additionalProperties: false
+      properties:
+        origine:
+          type: string
+          minLength: 1
+          maxLength: 500
+        destination:
+          type: string
+          minLength: 1
+          maxLength: 500
+        destinataire:
+          $ref: '#/components/schemas/Destinataire'
+        camionSouhaiteId:
+          type: string
+          minLength: 1
+          maxLength: 64
+    ChargementPatch:
+      type: object
+      additionalProperties: false
+      properties:
+        origine:
+          type: string
+          minLength: 1
+          maxLength: 500
+        destination:
+          type: string
+          minLength: 1
+          maxLength: 500
+        destinataire:
+          $ref: '#/components/schemas/Destinataire'
+        camionSouhaiteId:
+          type: string
+          minLength: 1
+          maxLength: 64
+      minProperties: 1
+    Chargement:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        origine:
+          type: string
+          nullable: true
+        destination:
+          type: string
+          nullable: true
+        destinataire:
+          type: object
+          additionalProperties: false
+          properties:
+            nom:
+              type: string
+              minLength: 1
+              maxLength: 160
+            telephone:
+              type: string
+              maxLength: 40
+          required:
+          - nom
+          nullable: true
+        camionSouhaiteId:
+          type: string
+          minLength: 1
+          maxLength: 64
+          nullable: true
+        poidsTotalKg:
+          type: number
+          minimum: 0
+        statut:
+          type: string
+          enum:
+          - BROUILLON
+          - VALIDE
+        version:
+          type: integer
+          minimum: 0
+        createdAt:
+          type: string
+          format: date-time
+        lignes:
+          type: array
+          items:
+            $ref: '#/components/schemas/LigneChargement'
+      required:
+      - id
+      - origine
+      - destination
+      - destinataire
+      - camionSouhaiteId
+      - poidsTotalKg
+      - statut
+      - version
+      - createdAt
+      - lignes
+      example:
+        id: CHG-001
+        origine: Depot, Rabat
+        destination: Entrepot, Casablanca
+        destinataire:
+          nom: Client A
+          telephone: '0600000000'
+        camionSouhaiteId: CAM-001
+        poidsTotalKg: 8000
+        statut: VALIDE
+        version: 2
+        createdAt: '2026-11-10T08:10:00Z'
+        lignes:
+        - id: LC-001
+          chargementId: CHG-001
+          designation: Sacs de ciment
+          quantite: 160
+          poidsUnitaireKg: 50
+    ChargementsPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Chargement'
+        page:
+          type: integer
+          minimum: 1
+        size:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total:
+          type: integer
+          minimum: 0
+      required:
+      - items
+      - page
+      - size
+      - total
+  parameters:
+    Page:
+      in: query
+      name: page
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Size:
+      in: query
+      name: size
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    Correlation:
+      in: header
+      name: X-Correlation-Id
+      required: false
+      schema:
+        type: string
+        maxLength: 160
+      description: Identifiant de trace propage aux appels sortants.
+    Idempotency:
+      in: header
+      name: Idempotency-Key
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 160
+      description: Cle stable pour un rejeu ; meme cle et autre methode, chemin ou corps = 409.
+  responses:
+    '400':
+      description: Requete mal formee
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Ressource absente
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '409':
+      description: Conflit de doublon ou etat incompatible
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '422':
+      description: Donnees metier invalides
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '503':
+      description: Service ou dependance temporairement indisponible
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

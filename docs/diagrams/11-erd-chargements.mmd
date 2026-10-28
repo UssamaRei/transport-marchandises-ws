@@ -1,0 +1,19 @@
+erDiagram
+    CHARGEMENT ||--o{ LIGNE_CHARGEMENT : contient
+    CHARGEMENT {
+      varchar id PK
+      varchar origine
+      varchar destination
+      varchar destinataire_nom
+      varchar camion_souhaite_id
+      numeric poids_total_kg
+      varchar statut
+      integer version
+    }
+    LIGNE_CHARGEMENT {
+      varchar id PK
+      varchar chargement_id FK
+      varchar designation
+      integer quantite
+      numeric poids_unitaire_kg
+    }

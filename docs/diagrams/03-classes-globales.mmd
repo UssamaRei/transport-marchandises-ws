@@ -1,0 +1,64 @@
+classDiagram
+    class Camion {
+      +string id
+      +string immatriculation
+      +decimal capaciteKg
+      +string etat
+      +boolean archive
+    }
+    class ReservationCamion {
+      +string id
+      +string camionId
+      +string transportId
+      +decimal poidsKg
+      +string statut
+    }
+    class Chargement {
+      +string id
+      +string origine
+      +string destination
+      +string camionSouhaiteId
+      +decimal poidsTotalKg
+      +string statut
+    }
+    class LigneChargement {
+      +string id
+      +string designation
+      +integer quantite
+      +decimal poidsUnitaireKg
+    }
+    class BonLivraison {
+      +string id
+      +string numero
+      +string chargementId
+      +decimal poidsTotalKg
+      +string statut
+    }
+    class LigneBon {
+      +string id
+      +string designation
+      +integer quantite
+      +decimal poidsUnitaireKg
+    }
+    class Transport {
+      +string id
+      +string bonId
+      +string camionId
+      +string reservationId
+      +string statut
+    }
+    class EvenementSuivi {
+      +string id
+      +string transportId
+      +string type
+      +datetime dateEvenement
+    }
+    Camion "1" -- "0..*" ReservationCamion : historique local
+    Chargement "1" *-- "0..*" LigneChargement : lignes locales
+    BonLivraison "1" *-- "1..*" LigneBon : copie locale
+    Transport "1" *-- "0..*" EvenementSuivi : chronologie locale
+    Chargement "1" .. "0..1" BonLivraison : reference API
+    Camion "0..1" .. "0..*" Chargement : camion souhaite
+    Camion "1" .. "0..*" Transport : camion affecte
+    BonLivraison "1" .. "0..*" Transport : tentatives
+    Transport "1" .. "0..1" ReservationCamion : reference API

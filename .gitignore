@@ -1,0 +1,33 @@
+# Secrets et configuration locale
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Dépendances et sorties selon le framework choisi
+node_modules/
+vendor/
+.venv/
+venv/
+__pycache__/
+*.pyc
+target/
+build/
+dist/
+bin/
+obj/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+coverage/
+.pytest_cache/
+
+# Outils et fichiers locaux
+tmp/
+.tools/
+*.aux
+*.out
+*.synctex.gz

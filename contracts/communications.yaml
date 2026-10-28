@@ -1,0 +1,41 @@
+calls:
+- from: flotte
+  to: transports
+  method: get
+  path: /api/v1/transports
+  trigger: Avant maintenance ; filtres camionId et actifs=true
+- from: chargements
+  to: flotte
+  method: get
+  path: /api/v1/camions/{id}
+  trigger: Validation du chargement
+- from: bons
+  to: chargements
+  method: get
+  path: /api/v1/chargements/{id}
+  trigger: Emission du bon
+- from: transports
+  to: bons
+  method: get
+  path: /api/v1/bons/{id}
+  trigger: Preparation du transport
+- from: transports
+  to: flotte
+  method: post
+  path: /api/v1/reservations
+  trigger: Reservation definitive
+- from: transports
+  to: flotte
+  method: get
+  path: /api/v1/reservations
+  trigger: Reprise par transportId
+- from: transports
+  to: bons
+  method: post
+  path: /api/v1/bons/{id}/preuve-livraison
+  trigger: Cloture de livraison
+- from: transports
+  to: flotte
+  method: post
+  path: /api/v1/reservations/{id}/liberation
+  trigger: Cloture ou annulation

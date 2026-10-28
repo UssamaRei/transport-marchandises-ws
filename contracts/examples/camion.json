@@ -1,0 +1,9 @@
+{
+  "id": "CAM-001",
+  "immatriculation": "12345-A-1",
+  "capaciteKg": 10000,
+  "etat": "EN_SERVICE",
+  "archive": false,
+  "disponible": true,
+  "createdAt": "2026-11-10T08:00:00Z"
+}

@@ -1,0 +1,18 @@
+classDiagram
+    class Camion {
+      +string id
+      +string immatriculation
+      +decimal capaciteKg
+      +string etat
+      +boolean archive
+      +estDisponible() boolean
+    }
+    class ReservationCamion {
+      +string id
+      +string camionId
+      +string transportId
+      +decimal poidsKg
+      +string statut
+      +liberer()
+    }
+    Camion "1" -- "0..*" ReservationCamion : historique

@@ -1,0 +1,8 @@
+{
+  "id": "RES-001",
+  "camionId": "CAM-001",
+  "transportId": "TRP-001",
+  "poidsKg": 8000,
+  "statut": "ACTIVE",
+  "createdAt": "2026-11-10T08:30:00Z"
+}

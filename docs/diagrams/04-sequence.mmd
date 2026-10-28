@@ -1,0 +1,30 @@
+sequenceDiagram
+    actor U as Operateur
+    participant C as Chargements
+    participant F as Flotte
+    participant B as Bons
+    participant T as Transports
+    U->>C: Valider le chargement
+    C->>F: Lire la capacite et la disponibilite du camion
+    F-->>C: Informations du camion
+    C-->>U: Chargement VALIDE
+    U->>B: Creer le bon
+    B->>C: Lire le chargement VALIDE
+    C-->>B: Marchandises, poids, adresses
+    B-->>U: Bon EMIS
+    U->>T: Planifier un transport avec le bon
+    T->>B: Lire le bon
+    B-->>T: Instantane du chargement et camion souhaite
+    Note over T: Enregistrer PREPARATION avant de reserver
+    T->>F: Reserver le camion pour ce transport
+    F-->>T: Reservation confirmee
+    T-->>U: Transport PLANIFIE
+    U->>T: Enregistrer le depart
+    U->>T: Confirmer la livraison
+    T->>B: Enregistrer la preuve de livraison
+    T->>F: Liberer la reservation
+    T-->>U: Transport LIVRE si les deux etapes sont confirmees
+    U->>F: Demander une maintenance
+    F->>T: Lire les transports actifs du camion
+    T-->>F: Liste issue de sa base locale
+    F-->>U: Maintenance acceptee si aucun voyage actif ni reservation

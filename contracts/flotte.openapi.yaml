@@ -1,0 +1,752 @@
+openapi: 3.0.3
+info:
+  title: API flotte
+  version: 0.1.0
+  description: Proposition de contrat pour le projet Web Services. Les endpoints restent a implementer et a valider
+    en equipe.
+servers:
+- url: http://localhost:8081
+  description: Depuis le PC
+- url: http://flotte:8080
+  description: Entre conteneurs Compose
+paths:
+  /health:
+    get:
+      operationId: API_flotte_get_health
+      summary: Sante du processus et de sa base locale
+      x-consumers:
+      - outils
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        '503':
+          $ref: '#/components/responses/503'
+      description: Ne pas appeler les autres backends pour repondre a ce controle local.
+  /api/v1/camions:
+    get:
+      operationId: API_flotte_get_camions
+      summary: Lister les camions
+      x-consumers:
+      - UI
+      - chargements
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: query
+        name: disponible
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: capaciteMinKg
+        required: false
+        schema:
+          type: number
+          minimum: 0
+      - in: query
+        name: etat
+        required: false
+        schema:
+          type: string
+          enum:
+          - EN_SERVICE
+          - MAINTENANCE
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CamionsPage'
+        '400':
+          $ref: '#/components/responses/400'
+        '503':
+          $ref: '#/components/responses/503'
+    post:
+      operationId: API_flotte_post_camions
+      summary: Creer un camion
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      responses:
+        '201':
+          description: Ressource creee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Camion'
+          headers:
+            Location:
+              description: URL relative de la ressource creee
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/400'
+        '409':
+          $ref: '#/components/responses/409'
+        '422':
+          $ref: '#/components/responses/422'
+        '503':
+          $ref: '#/components/responses/503'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CamionCreate'
+  /api/v1/camions/{id}:
+    get:
+      operationId: API_flotte_get_camions_id
+      summary: Consulter le camion pour preparer un chargement
+      x-consumers:
+      - UI
+      - chargements
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Camion'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '503':
+          $ref: '#/components/responses/503'
+    patch:
+      operationId: API_flotte_patch_camions_id
+      summary: Modifier immatriculation ou capacite
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Camion'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '422':
+          $ref: '#/components/responses/422'
+        '503':
+          $ref: '#/components/responses/503'
+      description: Refuser une modification incompatible avec une reservation active. Etat, archive et disponible
+        ne se modifient pas ici.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CamionPatch'
+  /api/v1/camions/{id}/archivage:
+    post:
+      operationId: API_flotte_post_camions_id_archivage
+      summary: Archiver un camion non reserve
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Camion'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '503':
+          $ref: '#/components/responses/503'
+  /api/v1/camions/{id}/maintenance:
+    post:
+      operationId: API_flotte_post_camions_id_maintenance
+      summary: Controler les voyages actifs puis entrer en maintenance
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Camion'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '422':
+          $ref: '#/components/responses/422'
+        '503':
+          $ref: '#/components/responses/503'
+      description: Appelle GET /api/v1/transports?camionId=...&actifs=true&size=1 puis verifie etat et reservations
+        sous verrou local.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceInput'
+  /api/v1/camions/{id}/remise-service:
+    post:
+      operationId: API_flotte_post_camions_id_remise_service
+      summary: Remettre le camion en service
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Camion'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '503':
+          $ref: '#/components/responses/503'
+  /api/v1/reservations:
+    post:
+      operationId: API_flotte_post_reservations
+      summary: Reserver atomiquement le camion pour un transport
+      x-consumers:
+      - transports
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - $ref: '#/components/parameters/Idempotency'
+      responses:
+        '201':
+          description: Ressource creee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+          headers:
+            Location:
+              description: URL relative de la ressource creee
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '422':
+          $ref: '#/components/responses/422'
+        '503':
+          $ref: '#/components/responses/503'
+      description: 'Verrou local, controle capacite/etat/archive et unicite ACTIVE. transportId est unique. Meme
+        demande rejouee : meme reservation.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationCreate'
+    get:
+      operationId: API_flotte_get_reservations
+      summary: Rechercher le resultat dune reservation
+      x-consumers:
+      - transports
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: query
+        name: transportId
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      - in: query
+        name: camionId
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      - in: query
+        name: statut
+        required: false
+        schema:
+          type: string
+          enum:
+          - ACTIVE
+          - LIBEREE
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationsPage'
+        '400':
+          $ref: '#/components/responses/400'
+        '503':
+          $ref: '#/components/responses/503'
+  /api/v1/reservations/{id}:
+    get:
+      operationId: API_flotte_get_reservations_id
+      summary: Lire une reservation
+      x-consumers:
+      - transports
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '503':
+          $ref: '#/components/responses/503'
+  /api/v1/reservations/{id}/liberation:
+    post:
+      operationId: API_flotte_post_reservations_id_liberation
+      summary: Liberer une reservation appartenant au transport
+      x-consumers:
+      - transports
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      - $ref: '#/components/parameters/Idempotency'
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '422':
+          $ref: '#/components/responses/422'
+        '503':
+          $ref: '#/components/responses/503'
+      description: 'Rejeu de la meme liberation accepte, meme si la reservation est deja LIBEREE. Autre transport
+        ou demande contradictoire : 409.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LiberationInput'
+components:
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+        correlationId:
+          type: string
+      required:
+      - code
+      - message
+      - correlationId
+    Health:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+          - ok
+      required:
+      - status
+    Destinataire:
+      type: object
+      additionalProperties: false
+      properties:
+        nom:
+          type: string
+          minLength: 1
+          maxLength: 160
+        telephone:
+          type: string
+          maxLength: 40
+      required:
+      - nom
+    Camion:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        immatriculation:
+          type: string
+          minLength: 1
+          maxLength: 40
+        capaciteKg:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          description: Poids en kg ; calculs en decimal.
+        etat:
+          type: string
+          enum:
+          - EN_SERVICE
+          - MAINTENANCE
+        archive:
+          type: boolean
+        disponible:
+          type: boolean
+          description: 'Calcule : en service, non archive, sans reservation ACTIVE.'
+        createdAt:
+          type: string
+          format: date-time
+      required:
+      - id
+      - immatriculation
+      - capaciteKg
+      - etat
+      - archive
+      - disponible
+      - createdAt
+      example:
+        id: CAM-001
+        immatriculation: 12345-A-1
+        capaciteKg: 10000
+        etat: EN_SERVICE
+        archive: false
+        disponible: true
+        createdAt: '2026-11-10T08:00:00Z'
+    CamionCreate:
+      type: object
+      additionalProperties: false
+      properties:
+        immatriculation:
+          type: string
+          minLength: 1
+          maxLength: 40
+        capaciteKg:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          description: Poids en kg ; calculs en decimal.
+      required:
+      - immatriculation
+      - capaciteKg
+    CamionPatch:
+      type: object
+      additionalProperties: false
+      properties:
+        immatriculation:
+          type: string
+          minLength: 1
+          maxLength: 40
+        capaciteKg:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          description: Poids en kg ; calculs en decimal.
+      minProperties: 1
+    MaintenanceInput:
+      type: object
+      additionalProperties: false
+      properties:
+        motif:
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - motif
+    Reservation:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        camionId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        transportId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        poidsKg:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          description: Poids en kg ; calculs en decimal.
+        statut:
+          type: string
+          enum:
+          - ACTIVE
+          - LIBEREE
+        createdAt:
+          type: string
+          format: date-time
+        releasedAt:
+          type: string
+          format: date-time
+          nullable: true
+        motifLiberation:
+          type: string
+          enum:
+          - LIVRAISON
+          - ANNULATION
+          nullable: true
+      required:
+      - id
+      - camionId
+      - transportId
+      - poidsKg
+      - statut
+      - createdAt
+      example:
+        id: RES-001
+        camionId: CAM-001
+        transportId: TRP-001
+        poidsKg: 8000
+        statut: ACTIVE
+        createdAt: '2026-11-10T08:30:00Z'
+    ReservationCreate:
+      type: object
+      additionalProperties: false
+      properties:
+        camionId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        transportId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        poidsKg:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          description: Poids en kg ; calculs en decimal.
+      required:
+      - camionId
+      - transportId
+      - poidsKg
+    LiberationInput:
+      type: object
+      additionalProperties: false
+      properties:
+        transportId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        motif:
+          type: string
+          enum:
+          - LIVRAISON
+          - ANNULATION
+      required:
+      - transportId
+      - motif
+    CamionsPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Camion'
+        page:
+          type: integer
+          minimum: 1
+        size:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total:
+          type: integer
+          minimum: 0
+      required:
+      - items
+      - page
+      - size
+      - total
+    ReservationsPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reservation'
+        page:
+          type: integer
+          minimum: 1
+        size:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total:
+          type: integer
+          minimum: 0
+      required:
+      - items
+      - page
+      - size
+      - total
+  parameters:
+    Page:
+      in: query
+      name: page
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Size:
+      in: query
+      name: size
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    Correlation:
+      in: header
+      name: X-Correlation-Id
+      required: false
+      schema:
+        type: string
+        maxLength: 160
+      description: Identifiant de trace propage aux appels sortants.
+    Idempotency:
+      in: header
+      name: Idempotency-Key
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 160
+      description: Cle stable pour un rejeu ; meme cle et autre methode, chemin ou corps = 409.
+  responses:
+    '400':
+      description: Requete mal formee
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Ressource absente
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '409':
+      description: Conflit de doublon ou etat incompatible
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '422':
+      description: Donnees metier invalides
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '503':
+      description: Service ou dependance temporairement indisponible
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

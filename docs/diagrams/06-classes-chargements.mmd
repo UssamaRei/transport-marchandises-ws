@@ -1,0 +1,20 @@
+classDiagram
+    class Chargement {
+      +string id
+      +string origine
+      +string destination
+      +string camionSouhaiteId
+      +decimal poidsTotalKg
+      +string statut
+      +integer version
+      +calculerPoids() decimal
+      +valider()
+    }
+    class LigneChargement {
+      +string id
+      +string chargementId
+      +string designation
+      +integer quantite
+      +decimal poidsUnitaireKg
+    }
+    Chargement "1" *-- "0..*" LigneChargement : contient

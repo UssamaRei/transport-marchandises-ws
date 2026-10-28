@@ -1,0 +1,11 @@
+stateDiagram-v2
+    [*] --> PREPARATION
+    PREPARATION --> PLANIFIE: reservation confirmee
+    PLANIFIE --> EN_COURS: depart
+    EN_COURS --> CLOTURE_EN_ATTENTE: demande de livraison
+    CLOTURE_EN_ATTENTE --> LIVRE: preuve et liberation confirmees
+    PREPARATION --> ANNULATION_EN_ATTENTE: annulation ou refus explicite
+    PLANIFIE --> ANNULATION_EN_ATTENTE: annulation avant depart
+    ANNULATION_EN_ATTENTE --> ANNULE: reservation reglee puis liberee si necessaire
+    LIVRE --> [*]
+    ANNULE --> [*]

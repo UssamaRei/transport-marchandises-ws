@@ -1,0 +1,21 @@
+classDiagram
+    class BonLivraison {
+      +string id
+      +string numero
+      +string chargementId
+      +string camionSouhaiteId
+      +decimal poidsTotalKg
+      +string statut
+      +string transportPreuveId
+      +string recepteur
+      +datetime livreLe
+      +confirmerReception()
+    }
+    class LigneBon {
+      +string id
+      +string bonId
+      +string designation
+      +integer quantite
+      +decimal poidsUnitaireKg
+    }
+    BonLivraison "1" *-- "1..*" LigneBon : instantane

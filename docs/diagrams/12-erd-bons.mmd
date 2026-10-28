@@ -1,0 +1,22 @@
+erDiagram
+    BON_LIVRAISON ||--|{ LIGNE_BON : copie
+    BON_LIVRAISON {
+      varchar id PK
+      varchar numero UK
+      varchar chargement_id UK
+      varchar camion_souhaite_id
+      varchar origine
+      varchar destination
+      numeric poids_total_kg
+      varchar statut
+      varchar transport_preuve_id UK
+      varchar recepteur
+      timestamptz livre_le
+    }
+    LIGNE_BON {
+      varchar id PK
+      varchar bon_id FK
+      varchar designation
+      integer quantite
+      numeric poids_unitaire_kg
+    }

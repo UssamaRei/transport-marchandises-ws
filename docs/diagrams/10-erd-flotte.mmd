@@ -1,0 +1,19 @@
+erDiagram
+    CAMION ||--o{ RESERVATION_CAMION : historique
+    CAMION {
+      varchar id PK
+      varchar immatriculation UK
+      numeric capacite_kg
+      varchar etat
+      boolean archive
+      timestamptz created_at
+    }
+    RESERVATION_CAMION {
+      varchar id PK
+      varchar camion_id FK
+      varchar transport_id UK
+      numeric poids_kg
+      varchar statut
+      varchar motif_liberation
+      timestamptz released_at
+    }

@@ -1,0 +1,13 @@
+* text=auto
+*.md text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.sql text eol=lf
+*.mmd text eol=lf
+*.py text eol=lf
+*.http text eol=lf
+.env.example text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+*.pdf binary
+*.svg text eol=lf

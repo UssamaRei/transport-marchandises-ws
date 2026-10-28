@@ -1,0 +1,20 @@
+flowchart TB
+    UI[Frontend commun ou Postman]
+    subgraph API[Quatre backends - REST et JSON]
+      F[Flotte / Camions]
+      C[Chargements]
+      B[Bons de livraison]
+      T[Transports / Suivi]
+    end
+    DF[(DB Flotte)]
+    DC[(DB Chargements)]
+    DB[(DB Bons)]
+    DT[(DB Transports)]
+    UI --> F
+    UI --> C
+    UI --> B
+    UI --> T
+    F --- DF
+    C --- DC
+    B --- DB
+    T --- DT

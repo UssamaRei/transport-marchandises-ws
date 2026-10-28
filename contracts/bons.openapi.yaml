@@ -1,0 +1,460 @@
+openapi: 3.0.3
+info:
+  title: API bons
+  version: 0.1.0
+  description: Proposition de contrat pour le projet Web Services. Les endpoints restent a implementer et a valider
+    en equipe.
+servers:
+- url: http://localhost:8083
+  description: Depuis le PC
+- url: http://bons:8080
+  description: Entre conteneurs Compose
+paths:
+  /health:
+    get:
+      operationId: API_bons_get_health
+      summary: Sante du processus et de sa base locale
+      x-consumers:
+      - outils
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        '503':
+          $ref: '#/components/responses/503'
+      description: Ne pas appeler les autres backends pour repondre a ce controle local.
+  /api/v1/bons:
+    post:
+      operationId: API_bons_post_bons
+      summary: Emettre un bon depuis un chargement VALIDE
+      x-consumers:
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - $ref: '#/components/parameters/Idempotency'
+      responses:
+        '201':
+          description: Ressource creee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bon'
+          headers:
+            Location:
+              description: URL relative de la ressource creee
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '422':
+          $ref: '#/components/responses/422'
+        '503':
+          $ref: '#/components/responses/503'
+      description: 'Appelle Chargements puis copie les donnees et lignes. Un chargement donne au plus un bon. Une
+        cle rejouee rend le meme bon ; autre emission pour le meme chargement : 409.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BonCreate'
+    get:
+      operationId: API_bons_get_bons
+      summary: Rechercher les bons
+      x-consumers:
+      - UI
+      - transports
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: query
+        name: numero
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: chargementId
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      - in: query
+        name: statut
+        required: false
+        schema:
+          type: string
+          enum:
+          - EMIS
+          - LIVRE
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BonsPage'
+        '400':
+          $ref: '#/components/responses/400'
+        '503':
+          $ref: '#/components/responses/503'
+  /api/v1/bons/{id}:
+    get:
+      operationId: API_bons_get_bons_id
+      summary: Lire le bon et son instantane
+      x-consumers:
+      - transports
+      - UI
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bon'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '503':
+          $ref: '#/components/responses/503'
+      description: Lecture locale independante de la disponibilite de Chargements apres emission.
+  /api/v1/bons/{id}/preuve-livraison:
+    post:
+      operationId: API_bons_post_bons_id_preuve_livraison
+      summary: Confirmer la reception du bon
+      x-consumers:
+      - transports
+      parameters:
+      - $ref: '#/components/parameters/Correlation'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      - $ref: '#/components/parameters/Idempotency'
+      responses:
+        '200':
+          description: Operation reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bon'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '422':
+          $ref: '#/components/responses/422'
+        '503':
+          $ref: '#/components/responses/503'
+      description: 'Operation destinee a Transports. Meme preuve acceptee sans doublon ; preuve contradictoire ou
+        autre transport : 409. Aucun rappel vers Transports pendant cette operation.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreuveInput'
+components:
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+        correlationId:
+          type: string
+      required:
+      - code
+      - message
+      - correlationId
+    Health:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+          - ok
+      required:
+      - status
+    Destinataire:
+      type: object
+      additionalProperties: false
+      properties:
+        nom:
+          type: string
+          minLength: 1
+          maxLength: 160
+        telephone:
+          type: string
+          maxLength: 40
+      required:
+      - nom
+    LigneBon:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        bonId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        designation:
+          type: string
+          minLength: 1
+          maxLength: 240
+        quantite:
+          type: integer
+          minimum: 1
+        poidsUnitaireKg:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          description: Poids en kg ; calculs en decimal.
+      required:
+      - id
+      - bonId
+      - designation
+      - quantite
+      - poidsUnitaireKg
+    BonCreate:
+      type: object
+      additionalProperties: false
+      properties:
+        chargementId:
+          type: string
+          minLength: 1
+          maxLength: 64
+      required:
+      - chargementId
+    PreuveInput:
+      type: object
+      additionalProperties: false
+      properties:
+        transportId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        recepteur:
+          type: string
+          minLength: 1
+          maxLength: 160
+        livreLe:
+          type: string
+          format: date-time
+        commentaire:
+          type: string
+          maxLength: 1000
+      required:
+      - transportId
+      - recepteur
+      - livreLe
+    Bon:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        numero:
+          type: string
+        chargementId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        camionSouhaiteId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        origine:
+          type: string
+        destination:
+          type: string
+        destinataire:
+          $ref: '#/components/schemas/Destinataire'
+        poidsTotalKg:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          description: Poids en kg ; calculs en decimal.
+        statut:
+          type: string
+          enum:
+          - EMIS
+          - LIVRE
+        createdAt:
+          type: string
+          format: date-time
+        lignes:
+          type: array
+          items:
+            $ref: '#/components/schemas/LigneBon'
+          minItems: 1
+        transportPreuveId:
+          type: string
+          minLength: 1
+          maxLength: 64
+          nullable: true
+        recepteur:
+          type: string
+          nullable: true
+        livreLe:
+          type: string
+          format: date-time
+          nullable: true
+        commentaire:
+          type: string
+          nullable: true
+      required:
+      - id
+      - numero
+      - chargementId
+      - camionSouhaiteId
+      - origine
+      - destination
+      - destinataire
+      - poidsTotalKg
+      - statut
+      - createdAt
+      - lignes
+      example:
+        id: BL-001
+        numero: BL-2026-0001
+        chargementId: CHG-001
+        camionSouhaiteId: CAM-001
+        origine: Depot, Rabat
+        destination: Entrepot, Casablanca
+        destinataire:
+          nom: Client A
+          telephone: '0600000000'
+        poidsTotalKg: 8000
+        statut: EMIS
+        createdAt: '2026-11-10T08:20:00Z'
+        lignes:
+        - id: LB-001
+          bonId: BL-001
+          designation: Sacs de ciment
+          quantite: 160
+          poidsUnitaireKg: 50
+    BonsPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bon'
+        page:
+          type: integer
+          minimum: 1
+        size:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total:
+          type: integer
+          minimum: 0
+      required:
+      - items
+      - page
+      - size
+      - total
+  parameters:
+    Page:
+      in: query
+      name: page
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Size:
+      in: query
+      name: size
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    Correlation:
+      in: header
+      name: X-Correlation-Id
+      required: false
+      schema:
+        type: string
+        maxLength: 160
+      description: Identifiant de trace propage aux appels sortants.
+    Idempotency:
+      in: header
+      name: Idempotency-Key
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 160
+      description: Cle stable pour un rejeu ; meme cle et autre methode, chemin ou corps = 409.
+  responses:
+    '400':
+      description: Requete mal formee
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Ressource absente
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '409':
+      description: Conflit de doublon ou etat incompatible
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '422':
+      description: Donnees metier invalides
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '503':
+      description: Service ou dependance temporairement indisponible
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

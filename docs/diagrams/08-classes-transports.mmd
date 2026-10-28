@@ -1,0 +1,23 @@
+classDiagram
+    class Transport {
+      +string id
+      +string bonId
+      +string camionId
+      +string reservationId
+      +string statut
+      +string syncEtat
+      +datetime departPrevu
+      +datetime departReel
+      +datetime arriveeReelle
+      +demarrer()
+      +terminer()
+      +annuler()
+    }
+    class EvenementSuivi {
+      +string id
+      +string transportId
+      +string type
+      +string description
+      +datetime dateEvenement
+    }
+    Transport "1" *-- "0..*" EvenementSuivi : chronologie

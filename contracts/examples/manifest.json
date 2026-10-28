@@ -1,0 +1,27 @@
+[
+  {
+    "file": "camion.json",
+    "contract": "flotte.openapi.yaml",
+    "schema": "Camion"
+  },
+  {
+    "file": "chargement.json",
+    "contract": "chargements.openapi.yaml",
+    "schema": "Chargement"
+  },
+  {
+    "file": "bon.json",
+    "contract": "bons.openapi.yaml",
+    "schema": "Bon"
+  },
+  {
+    "file": "transport.json",
+    "contract": "transports.openapi.yaml",
+    "schema": "Transport"
+  },
+  {
+    "file": "reservation.json",
+    "contract": "flotte.openapi.yaml",
+    "schema": "Reservation"
+  }
+]
