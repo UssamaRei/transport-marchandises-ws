@@ -35,6 +35,7 @@ Les quatre backends se connectent à **la même base Neon**. Chaque module gère
 Les échanges métier entre modules passent par leurs API, même avec une base commune.
 Les accès sont transmis en privé et configurés dans l’IDE ou dans les variables d’environnement.
 Voir [.env.example](.env.example) pour les noms des variables. Aucun mot de passe dans Git.
+Les huit tables sont créées sur Neon. Voir [les tables et les comptes par module](database/README.md).
 
 Une copie locale facultative de PostgreSQL peut être lancée avec :
 
@@ -43,7 +44,8 @@ cp .env.example .env
 docker compose up -d
 ```
 
-Ce Compose lance uniquement une base locale vide. Le code, les migrations communes,
+Ce Compose lance uniquement une base locale vide ; la migration initiale se trouve dans `database/`.
+Le code, les migrations suivantes,
 les Dockerfiles et le Compose des quatre backends seront ajoutés pendant le développement.
 
 ## Travailler ensemble

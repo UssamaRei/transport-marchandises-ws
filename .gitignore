@@ -38,3 +38,4 @@ tmp/
 .codex/
 
 skills-lock.json
+.secrets/
