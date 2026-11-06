@@ -31,3 +31,10 @@ tmp/
 *.aux
 *.out
 *.synctex.gz
+.neon
+
+.agents/
+
+.codex/
+
+skills-lock.json
