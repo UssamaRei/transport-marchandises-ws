@@ -3,7 +3,8 @@
 Préparer les marchandises, émettre un bon de livraison et suivre le voyage du camion.
 
 **4 backends Spring Boot, une base PostgreSQL commune sur Neon, des échanges REST / JSON.**
-Le dépôt contient le cadrage du projet. Les backends restent à développer.
+Le backend **Chargements** est implémenté. Les trois autres backends restent à développer.
+Voir [démarrage, routes et exemples Chargements](services/chargements/README.md).
 
 ## Ma partie
 
@@ -45,8 +46,8 @@ docker compose up -d
 ```
 
 Ce Compose lance uniquement une base locale vide ; la migration initiale se trouve dans `database/`.
-Le code, les migrations suivantes,
-les Dockerfiles et le Compose des quatre backends seront ajoutés pendant le développement.
+Le module Chargements possède son Dockerfile. Les autres Dockerfiles et le Compose
+des quatre backends seront ajoutés pendant l’intégration.
 
 ## Travailler ensemble
 
