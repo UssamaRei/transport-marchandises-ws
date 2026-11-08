@@ -6,6 +6,8 @@
 *.mmd text eol=lf
 *.py text eol=lf
 *.http text eol=lf
+mvnw text eol=lf
+*.cmd text eol=crlf
 .env.example text eol=lf
 .gitignore text eol=lf
 .gitattributes text eol=lf
