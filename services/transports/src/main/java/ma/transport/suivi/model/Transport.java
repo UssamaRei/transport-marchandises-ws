@@ -1,6 +1,7 @@
-package ma.transport.suivi;
+package ma.transport.suivi.model;
 
 import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Objects;
@@ -123,4 +124,28 @@ public class Transport {
     public OffsetDateTime getArriveeReelle() { return arriveeReelle; }
     public boolean isPreuveConfirmee() { return preuveConfirmee; }
     public boolean isLiberationConfirmee() { return liberationConfirmee; }
+
+    public String getBonId() {
+        return bonId;
+    }
+
+    public String getCamionId() {
+        return camionId;
+    }
+
+    public BigDecimal getPoidsKg() {
+        return poidsKg;
+    }
+
+    public String getDestination() {
+        return destination;
+    }
+
+    public OffsetDateTime getDepartPrevu() {
+        return departPrevu;
+    }
+
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
 }
