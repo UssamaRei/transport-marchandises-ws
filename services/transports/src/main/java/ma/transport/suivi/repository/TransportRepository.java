@@ -17,4 +17,6 @@ public interface TransportRepository
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select t from Transport t where t.id = :id")
     Optional<Transport> findByIdForUpdate(@Param("id") String id);
+
+    Optional<Transport> findByOperationKey(String operationKey);
 }
