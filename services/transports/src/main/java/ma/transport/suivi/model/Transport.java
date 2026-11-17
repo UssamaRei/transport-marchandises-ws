@@ -125,6 +125,43 @@ public class Transport {
     public boolean isPreuveConfirmee() { return preuveConfirmee; }
     public boolean isLiberationConfirmee() { return liberationConfirmee; }
 
+
+    /**
+     * Commence l'annulation d'un transport planifié.
+     * La libération du camion doit encore être confirmée par Camions.
+     */
+    public void demanderAnnulation() {
+        if (statut == StatutTransport.ANNULATION_EN_ATTENTE || statut == StatutTransport.ANNULE) {
+            return;
+        }
+
+        exigerStatut(StatutTransport.PLANIFIE);
+
+        if (reservationId == null || reservationId.isBlank()) {
+            throw new IllegalStateException(
+                    "Réservation obligatoire pour annuler ce transport"
+            );
+        }
+
+        this.statut = StatutTransport.ANNULATION_EN_ATTENTE;
+        this.syncEtat = SyncEtat.A_REPRENDRE;
+    }
+
+    /**
+     * À appeler uniquement après confirmation de libération par Camions.
+     */
+    public void confirmerLiberationEtFinaliserAnnulation() {
+        if (statut == StatutTransport.ANNULE) {
+            return;
+        }
+
+        exigerStatut(StatutTransport.ANNULATION_EN_ATTENTE);
+
+        this.liberationConfirmee = true;
+        this.statut = StatutTransport.ANNULE;
+        this.syncEtat = SyncEtat.OK;
+    }
+
     public String getBonId() {
         return bonId;
     }
