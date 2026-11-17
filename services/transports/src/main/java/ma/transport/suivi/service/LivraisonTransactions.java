@@ -33,8 +33,24 @@ public class LivraisonTransactions {
         Transport transport = trouverAvecVerrou(transportId);
         verifierEtatLivraison(transport);
 
+        // Vérifie que la demande correspond à la preuve préparée localement.
         if (demande == null
-                || preuve == null
+                || !transport.correspondPreuveLivraison(
+                demande.receptionnaire(),
+                demande.dateReception(),
+                demande.commentaire()
+        )
+                || !("livraison:" + transport.getId()).equals(
+                demande.operationKey()
+        )) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "La preuve ne correspond pas aux données préparées"
+            );
+        }
+
+        // Vérifie la confirmation renvoyée par le service Bons.
+        if (preuve == null
                 || demande.transportId() == null
                 || demande.receptionnaire() == null
                 || demande.receptionnaire().isBlank()

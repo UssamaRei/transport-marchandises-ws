@@ -54,12 +54,18 @@ class LivraisonTransactionsTest {
         transport.demarrer(date);
         transport.enregistrerArrivee(date.plusHours(3));
 
+        transport.preparerPreuveLivraison(
+                "Mohamed",
+                LocalDate.parse("2026-11-17"),
+                "Reçu"
+        );
+
         demande = new PreuveLivraisonRequest(
                 transport.getId(),
                 "Mohamed",
                 LocalDate.parse("2026-11-17"),
                 "Reçu",
-                "preuve-1"
+                "livraison:" + transport.getId()
         );
 
         preuve = new PreuveLivraisonResponse(

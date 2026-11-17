@@ -44,6 +44,15 @@ public class Transport {
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
+    @Column(name = "preuve_receptionnaire", length = 160)
+    private String preuveReceptionnaire;
+
+    @Column(name = "preuve_date_reception")
+    private java.time.LocalDate preuveDateReception;
+
+    @Column(name = "preuve_commentaire", length = 1000)
+    private String preuveCommentaire;
+
     protected Transport() { } // requis par JPA
 
     public Transport(String bonId, String camionId, BigDecimal poidsKg, String destination,
@@ -185,4 +194,58 @@ public class Transport {
     public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
+
+    public void preparerPreuveLivraison(
+            String receptionnaire,
+            java.time.LocalDate dateReception,
+            String commentaire
+    ) {
+        if (statut != StatutTransport.CLOTURE_EN_ATTENTE
+                && statut != StatutTransport.LIVRE) {
+            throw new IllegalStateException(
+                    "Le transport doit être en attente de clôture"
+            );
+        }
+
+        if (receptionnaire == null
+                || receptionnaire.isBlank()
+                || receptionnaire.length() > 160
+                || dateReception == null
+                || (commentaire != null && commentaire.length() > 1000)) {
+            throw new IllegalArgumentException("Données de preuve invalides");
+        }
+
+        if (preuveReceptionnaire != null) {
+            if (!correspondPreuveLivraison(
+                    receptionnaire, dateReception, commentaire)) {
+                throw new IllegalStateException(
+                        "Une preuve différente a déjà été préparée"
+                );
+            }
+            return;
+        }
+
+        if (preuveConfirmee || statut == StatutTransport.LIVRE) {
+            throw new IllegalStateException(
+                    "Ancienne preuve sans données locales : vérification manuelle nécessaire"
+            );
+        }
+
+        this.preuveReceptionnaire = receptionnaire;
+        this.preuveDateReception = dateReception;
+        this.preuveCommentaire = commentaire;
+    }
+
+    public boolean correspondPreuveLivraison(
+            String receptionnaire,
+            java.time.LocalDate dateReception,
+            String commentaire
+    ) {
+        return preuveReceptionnaire != null
+                && Objects.equals(preuveReceptionnaire, receptionnaire)
+                && Objects.equals(preuveDateReception, dateReception)
+                && Objects.equals(preuveCommentaire, commentaire);
+    }
+
+
 }
