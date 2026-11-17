@@ -11,6 +11,10 @@ Voir [démarrage, routes et exemples Chargements](services/chargements/README.md
 Chargements vérifie les JWT et utilise un compte technique pour appeler Camions.
 Les autres backends doivent reprendre cette configuration dans leurs branches.
 
+**Interface :** [frontend Transit](frontend/README.md), avec les cinq vues Chargements connectées
+aux API et les autres écrans conservés en maquettes. Sur Windows, démarrer Docker Desktop puis
+lancer `.\demarrer-local.ps1` ; ouvrir <http://localhost:5173>.
+
 ## Ma partie
 
 | Étudiant | Module | Son guide |
