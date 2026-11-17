@@ -6,6 +6,10 @@ Préparer les marchandises, émettre un bon de livraison et suivre le voyage du 
 Le backend **Chargements** est implémenté. Les trois autres backends restent à développer.
 Voir [démarrage, routes et exemples Chargements](services/chargements/README.md).
 
+**Authentification :** [Keycloak, rôles, connexion Postman et intégration des backends](auth/README.md).
+Chargements vérifie les JWT et utilise un compte technique pour appeler Camions.
+Les autres backends doivent reprendre cette configuration dans leurs branches.
+
 ## Ma partie
 
 | Étudiant | Module | Son guide |

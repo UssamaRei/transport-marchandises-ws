@@ -3,6 +3,10 @@
 Préparer les marchandises, calculer leur poids et valider un chargement avec un camion adapté.
 Backend **Java 21 / Spring Boot / PostgreSQL**, sur le port **8082**.
 
+**Authentification activée :** voir [la configuration commune Keycloak](../../auth/README.md).
+Les routes métier exigent un JWT : ADMIN/AGENT pour les écritures, LECTEUR pour la lecture,
+SERVICE_BONS pour les lectures techniques. Swagger reste public et propose **Authorize**.
+
 ## Ce qui fonctionne
 
 - Créer, consulter, modifier et supprimer un brouillon.
@@ -22,6 +26,7 @@ Prérequis : **JDK 21**. Le wrapper télécharge Maven au premier lancement.
 1. Ouvrir ce dossier comme projet Maven dans l’IDE.
 2. Configurer les trois variables `SPRING_DATASOURCE_*` du fichier privé `chargements_app.env`.
 3. Définir `CAMIONS_SERVICE_URL` avec l’adresse de Camions (défaut : `http://localhost:8081`).
+   Ajouter aussi `AUTH_ISSUER_URI` et le secret privé `CHARGEMENTS_CLIENT_SECRET` de Keycloak.
 4. Lancer `ChargementsApplication`, ou `./mvnw spring-boot:run` (`.\mvnw.cmd` sous Windows).
 
 Sous PowerShell, charger le fichier privé et démarrer en une commande :
@@ -146,6 +151,8 @@ Les identifiants sont des `String`, les poids des `BigDecimal` et les dates des 
 | `spring-boot-starter-jdbc` | `JdbcTemplate`, transactions, pool de connexions |
 | `spring-boot-starter-validation` | Validation des requêtes |
 | `spring-cloud-starter-openfeign` | Consommation de Camions |
+| `spring-boot-starter-oauth2-resource-server` | Vérification des JWT et autorisations |
+| `spring-boot-starter-oauth2-client` | Jeton technique client credentials pour OpenFeign |
 | `postgresql` | Driver PostgreSQL |
 | `springdoc-openapi-starter-webmvc-ui` | Swagger / OpenAPI |
 | `spring-boot-starter-test`, `h2` | Tests, sans accès Neon par défaut |

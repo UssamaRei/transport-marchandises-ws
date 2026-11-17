@@ -29,6 +29,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -37,6 +39,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -54,6 +58,8 @@ class ChargementsIntegrationTest {
     @Autowired
     private MockMvc mvc;
     @Autowired
+    private WebApplicationContext context;
+    @Autowired
     private ObjectMapper mapper;
     @Autowired
     private JdbcTemplate jdbc;
@@ -64,12 +70,24 @@ class ChargementsIntegrationTest {
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
         registry.add("camions.service.url", () -> "http://127.0.0.1:" + CAMIONS.getAddress().getPort());
+        registry.add("spring.security.oauth2.client.provider.transport.token-uri",
+                () -> "http://127.0.0.1:" + CAMIONS.getAddress().getPort() + "/token");
+        registry.add("spring.security.oauth2.client.registration.camions.client-secret", () -> "test-secret");
     }
 
     private static HttpServer startCamions() {
         try {
             HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
             server.createContext("/", exchange -> {
+                if (exchange.getRequestURI().getPath().equals("/token")) {
+                    byte[] token = ("{\"access_token\":\"test-service-token\",\"token_type\":\"Bearer\",\"expires_in\":300}")
+                            .getBytes(StandardCharsets.UTF_8);
+                    exchange.getResponseHeaders().add("Content-Type", "application/json");
+                    exchange.sendResponseHeaders(200, token.length);
+                    exchange.getResponseBody().write(token);
+                    exchange.close();
+                    return;
+                }
                 CALLS.incrementAndGet();
                 if (requestEntered != null) {
                     requestEntered.countDown();
@@ -83,7 +101,8 @@ class ChargementsIntegrationTest {
                     }
                 }
                 String expectedPath = "/api/v1/camions/";
-                int status = exchange.getRequestURI().getPath().startsWith(expectedPath)
+                int status = !"Bearer test-service-token".equals(exchange.getRequestHeaders().getFirst("Authorization"))
+                        ? 401 : exchange.getRequestURI().getPath().startsWith(expectedPath)
                         && exchange.getRequestMethod().equals("GET") ? camionStatus : 404;
                 byte[] response = camionResponse.getBytes(StandardCharsets.UTF_8);
                 exchange.getResponseHeaders().add("Content-Type", "application/json");
@@ -100,6 +119,8 @@ class ChargementsIntegrationTest {
 
     @BeforeEach
     void prepareCamion() {
+        mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity())
+                .defaultRequest(get("/").with(user("test-agent").roles("AGENT"))).build();
         camionId = UUID.randomUUID().toString();
         // Ce camion est seulement une fixture pour la cle etrangere de la base partagee.
         // Le service doit toujours lire sa disponibilite par HTTP.

@@ -17,6 +17,7 @@ import ma.transport.chargements.proxy.CamionsProxy;
 import ma.transport.chargements.repository.ChargementRepository;
 import ma.transport.chargements.repository.LigneChargementRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.oauth2.core.OAuth2AuthorizationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Isolation;
@@ -187,6 +188,9 @@ public class ChargementService {
             return camionsProxy.findCamionById(camionId);
         } catch (FeignException.NotFound exception) {
             throw new ChargementException(HttpStatus.BAD_REQUEST, "Le camion demande n'existe pas.");
+        } catch (OAuth2AuthorizationException exception) {
+            throw new ChargementException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "Le fournisseur d'authentification est indisponible. Reessayer plus tard.");
         } catch (FeignException exception) {
             throw new ChargementException(HttpStatus.SERVICE_UNAVAILABLE,
                     "Le service Camions est indisponible. Reessayer plus tard.");

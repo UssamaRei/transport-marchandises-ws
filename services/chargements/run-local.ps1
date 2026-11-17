@@ -14,12 +14,12 @@ foreach ($line in Get-Content -LiteralPath $EnvFile) {
     $parts = $line.Split('=', 2)
     if ($parts.Length -ne 2) { continue }
     $name = $parts[0].Trim()
-    if ($name -notmatch '^(SPRING_DATASOURCE_[A-Z_]+|CAMIONS_SERVICE_URL|SERVER_PORT)$') { continue }
+    if ($name -notmatch '^(SPRING_DATASOURCE_[A-Z_]+|CAMIONS_SERVICE_URL|SERVER_PORT|AUTH_ISSUER_URI|AUTH_JWK_SET_URI|AUTH_TOKEN_URI|CHARGEMENTS_CLIENT_SECRET|FRONTEND_ORIGINS)$') { continue }
     $value = $parts[1].Trim().Trim('"').Trim("'")
     [Environment]::SetEnvironmentVariable($name, $value, 'Process')
 }
 
-foreach ($name in @('SPRING_DATASOURCE_URL', 'SPRING_DATASOURCE_USERNAME', 'SPRING_DATASOURCE_PASSWORD')) {
+foreach ($name in @('SPRING_DATASOURCE_URL', 'SPRING_DATASOURCE_USERNAME', 'SPRING_DATASOURCE_PASSWORD', 'CHARGEMENTS_CLIENT_SECRET')) {
     if (-not [Environment]::GetEnvironmentVariable($name, 'Process')) {
         throw "Variable manquante : $name"
     }
