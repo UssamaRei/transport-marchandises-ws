@@ -1,0 +1,27 @@
+# Applications locales apres construction des JAR. Combiner avec compose.auth.yaml.
+services:
+  camions:
+    image: eclipse-temurin:21-jre
+    entrypoint: ["java", "-jar", "/app/app.jar"]
+    env_file:
+      - ${WS_CAMIONS_ENV_FILE:?Lancer demarrer-local.ps1 avec les fichiers prives}
+    environment:
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 0
+    volumes:
+      - ./services/flotte/target/flotte-0.1.0-SNAPSHOT.jar:/app/app.jar:ro
+    ports:
+      - "127.0.0.1:8081:8081"
+  chargements:
+    image: eclipse-temurin:21-jre
+    entrypoint: ["java", "-jar", "/app/app.jar"]
+    env_file:
+      - ${WS_CHARGEMENTS_ENV_FILE:?Lancer demarrer-local.ps1 avec les fichiers prives}
+    environment:
+      CAMIONS_SERVICE_URL: http://camions:8081
+      AUTH_JWK_SET_URI: http://keycloak:8090/realms/transport-ws/protocol/openid-connect/certs
+      AUTH_TOKEN_URI: http://keycloak:8090/realms/transport-ws/protocol/openid-connect/token
+    volumes:
+      - ./services/chargements/target/chargements-0.0.1-SNAPSHOT.jar:/app/app.jar:ro
+    ports:
+      - "127.0.0.1:8082:8082"

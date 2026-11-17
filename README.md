@@ -3,14 +3,17 @@
 Préparer les marchandises, émettre un bon de livraison et suivre le voyage du camion.
 
 **4 backends Spring Boot, une base PostgreSQL commune sur Neon, des échanges REST / JSON.**
-**Chargements** et **Transports / Suivi** ont une implémentation.
-**Camions** contient actuellement les tests de Hassan, sans application exécutable ;
+**Chargements**, **Camions** et **Transports / Suivi** ont une implémentation exécutable.
 **Bons de livraison** dispose du contrat à implémenter.
 Voir [démarrage, routes et exemples Chargements](services/chargements/README.md).
 
 **Authentification :** [Keycloak, rôles, connexion Postman et intégration des backends](auth/README.md).
 Chargements vérifie les JWT et utilise un compte technique pour appeler Camions.
 Les autres backends doivent reprendre cette configuration dans leurs branches.
+
+**Interface :** [frontend Transit](frontend/README.md), avec les cinq vues Chargements connectées
+aux API et les autres écrans conservés en maquettes. Sur Windows, démarrer Docker Desktop puis
+lancer `.\demarrer-local.ps1` ; ouvrir <http://localhost:5173>.
 
 ## Ma partie
 
