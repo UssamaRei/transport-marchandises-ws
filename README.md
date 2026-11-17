@@ -3,7 +3,14 @@
 Préparer les marchandises, émettre un bon de livraison et suivre le voyage du camion.
 
 **4 backends Spring Boot, une base PostgreSQL commune sur Neon, des échanges REST / JSON.**
-Le dépôt contient le cadrage du projet. Les backends restent à développer.
+**Chargements** et **Transports / Suivi** ont une implémentation.
+**Camions** contient actuellement les tests de Hassan, sans application exécutable ;
+**Bons de livraison** dispose du contrat à implémenter.
+Voir [démarrage, routes et exemples Chargements](services/chargements/README.md).
+
+**Authentification :** [Keycloak, rôles, connexion Postman et intégration des backends](auth/README.md).
+Chargements vérifie les JWT et utilise un compte technique pour appeler Camions.
+Les autres backends doivent reprendre cette configuration dans leurs branches.
 
 ## Ma partie
 
@@ -36,6 +43,7 @@ Les échanges métier entre modules passent par leurs API, même avec une base c
 Les accès sont transmis en privé et configurés dans l’IDE ou dans les variables d’environnement.
 Voir [.env.example](.env.example) pour les noms des variables. Aucun mot de passe dans Git.
 Les huit tables sont créées sur Neon. Voir [les tables et les comptes par module](database/README.md).
+La migration V2 ajoute les données de preuve nécessaires à la reprise d'une livraison.
 
 Une copie locale facultative de PostgreSQL peut être lancée avec :
 
@@ -45,8 +53,8 @@ docker compose up -d
 ```
 
 Ce Compose lance uniquement une base locale vide ; la migration initiale se trouve dans `database/`.
-Le code, les migrations suivantes,
-les Dockerfiles et le Compose des quatre backends seront ajoutés pendant le développement.
+Le module Chargements possède son Dockerfile. Les autres Dockerfiles et le Compose
+des quatre backends seront ajoutés pendant l’intégration.
 
 ## Travailler ensemble
 

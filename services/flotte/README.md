@@ -37,6 +37,10 @@ Toutes les routes commencent par `/api/v1`. Le frontend ou Postman utilise aussi
 
 **J’appelle Transports** : `GET /transports?camionId=...&actifs=true` avant une maintenance.
 
+Pour Chargements, `GET /camions/{id}` renvoie `id`, `capaciteKg`, `etat`, `archive`
+et `disponible` (calculé à partir des réservations actives).
+Voir [le contrat et l’exemple JSON](../chargements/README.md#api-consommée--camions).
+
 **Règle :** un seul transport peut réserver un camion à la fois. Refuser la maintenance si un voyage est actif.
 
 Tables gérées : `camion`, `reservation_camion`, dans la base commune.

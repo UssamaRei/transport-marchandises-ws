@@ -1,0 +1,25 @@
+# Fournisseur d'identite local pour les quatre backends.
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.2
+    command: ["start-dev", "--import-realm", "--http-port=8090"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?Lancer auth/demarrer.ps1}
+      KC_HOSTNAME: ${AUTH_BASE_URL:-http://localhost:8090}
+      CHARGEMENTS_CLIENT_SECRET: ${CHARGEMENTS_CLIENT_SECRET:?Secret manquant}
+      CAMIONS_CLIENT_SECRET: ${CAMIONS_CLIENT_SECRET:?Secret manquant}
+      BONS_CLIENT_SECRET: ${BONS_CLIENT_SECRET:?Secret manquant}
+      TRANSPORTS_CLIENT_SECRET: ${TRANSPORTS_CLIENT_SECRET:?Secret manquant}
+      WS_ADMIN_PASSWORD: ${WS_ADMIN_PASSWORD:?Secret manquant}
+      WS_AGENT_PASSWORD: ${WS_AGENT_PASSWORD:?Secret manquant}
+      WS_LECTEUR_PASSWORD: ${WS_LECTEUR_PASSWORD:?Secret manquant}
+    ports:
+      - "127.0.0.1:8090:8090"
+    volumes:
+      - keycloak-data:/opt/keycloak/data
+      - ./auth/transport-ws-realm.json:/opt/keycloak/data/import/transport-ws-realm.json:ro
+    restart: unless-stopped
+
+volumes:
+  keycloak-data:
