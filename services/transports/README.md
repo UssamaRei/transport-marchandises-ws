@@ -45,4 +45,9 @@ Si une confirmation manque, retrouver la réservation avec `GET /reservations?tr
 
 Tables gérées : `transport`, `evenement_suivi`, dans la base commune.
 
+**Schéma :** V1 puis [V2 (preuve et reprise)](../../database/V2__transport_preuve_reprise.sql),
+déjà appliquées sur Neon. V2 conserve le réceptionnaire, la date et le commentaire avant l'appel à Bons.
+Le [contrat Bons](../bons/README.md#contrat-de-preuve-utilisé-par-transports) définit les champs
+`dateReception` (date ISO sans heure), `operationKey` et la réponse attendue en cas de répétition.
+
 [Retour au projet](../../README.md)

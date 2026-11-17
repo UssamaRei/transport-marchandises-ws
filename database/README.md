@@ -20,7 +20,15 @@ Cette version est déjà appliquée sur Neon. Ne pas la réexécuter sur cette b
 Toute évolution prend la forme d’une nouvelle migration discutée en pull request.
 Le responsable applique les migrations avec son accès propriétaire, dans une transaction.
 
+[V2__transport_preuve_reprise.sql](V2__transport_preuve_reprise.sql) ajoute les trois colonnes
+de preuve préparée utilisées par Transports : réceptionnaire, date et commentaire. Elles restent
+nullables pour conserver les transports existants. Bons conserve la preuve officielle ; cette copie
+locale permet de reprendre un appel interrompu. Les anciens transports sans copie locale ne sont
+pas complétés avec des données inventées.
+V2 a été testée sur une branche Neon isolée, puis appliquée à la base commune le **17 novembre 2026**.
+
 IDs : `String` (`varchar(64)`, UUID par défaut). Poids : `BigDecimal` en kg.
-Dates : `OffsetDateTime` (`timestamptz`). Les tables et colonnes utilisent `snake_case`.
-Chargements implémente son calcul de poids et sa validation. Les autres règles métier
-et transitions restent à développer dans les modules concernés.
+Instants : `OffsetDateTime` (`timestamptz`). `transport.preuve_date_reception` est une date civile
+(`LocalDate` / `date`). Le contrat de preuve de Bons utilise aussi `dateReception` ; voir
+[le format API et sa représentation dans livre_le](../services/bons/README.md#contrat-de-preuve-utilisé-par-transports).
+Les tables et colonnes utilisent `snake_case`.

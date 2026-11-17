@@ -50,6 +50,9 @@ classDiagram
       -String id
       -String statut
       -DateTime departPrevu
+      -String preuveReceptionnaire
+      -Date preuveDateReception
+      -String preuveCommentaire
       +demarrer()
       +confirmerLivraison()
     }
