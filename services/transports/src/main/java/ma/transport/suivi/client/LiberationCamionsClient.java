@@ -27,6 +27,19 @@ public class LiberationCamionsClient {
     public ReservationLiberationResponse libererPourAnnulation(
             String reservationId
     ) {
+        return liberer(reservationId, "ANNULATION");
+    }
+
+    public ReservationLiberationResponse libererPourLivraison(
+            String reservationId
+    ) {
+        return liberer(reservationId, "LIVRAISON");
+    }
+
+    private ReservationLiberationResponse liberer(
+            String reservationId,
+            String motif
+    ) {
         if (reservationId == null || reservationId.isBlank()) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -37,7 +50,7 @@ public class LiberationCamionsClient {
         try {
             ReservationLiberationResponse resultat = restClient.post()
                     .uri("/api/v1/reservations/{id}/liberation", reservationId)
-                    .body(Map.of("motif", "ANNULATION"))
+                    .body(Map.of("motif", motif))
                     .retrieve()
                     .body(ReservationLiberationResponse.class);
 
@@ -66,7 +79,7 @@ public class LiberationCamionsClient {
         } catch (ResourceAccessException erreur) {
             throw new ResponseStatusException(
                     HttpStatus.SERVICE_UNAVAILABLE,
-                    "Libération incertaine : annulation à reprendre"
+                    "Libération incertaine : opération à reprendre"
             );
 
         } catch (RestClientException erreur) {
