@@ -67,8 +67,11 @@ Se connecter avec l'un des comptes ci-dessus, puis **Use Token**. La requête po
 `Authorization: Bearer <access_token>`. Le jeton d'accès dure cinq minutes.
 Sans jeton/jeton invalide : **401**. Jeton valide mais rôle insuffisant : **403**.
 
-Le futur frontend utilisera aussi `transport-web` avec PKCE. Les adresses locales autorisées sont
+Le frontend utilise `transport-web` avec PKCE. Les adresses locales autorisées sont
 `http://localhost:5173` et `http://localhost:3000`. Aucun secret client dans le navigateur.
+La configuration exportée autorise la déconnexion vers ces mêmes adresses.
+Pour un realm déjà importé avant l'ajout du frontend, ouvrir **Clients → transport-web → Settings**
+et mettre **Valid post logout redirect URIs** à `+` (réutilise les adresses de redirection autorisées).
 
 ## Appels entre les quatre backends
 
