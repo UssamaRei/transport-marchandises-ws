@@ -15,6 +15,7 @@ import ma.transport.flotte.repository.CamionRepository;
 import ma.transport.flotte.repository.ReservationCamionRepository;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.UUID;
 import java.math.BigDecimal;
@@ -50,7 +51,7 @@ public class CamionService {
                 request.capaciteKg(),
                 EtatCamion.EN_SERVICE,
                 false,
-                OffsetDateTime.now(ZoneOffset.UTC));
+                OffsetDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS));
         try {
             camion = camionRepository.saveAndFlush(camion);
         } catch (DataIntegrityViolationException exception) {

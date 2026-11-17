@@ -2,6 +2,10 @@
 
 **Spring Boot + PostgreSQL.** Je gère les véhicules, leur capacité et leurs réservations.
 
+L'API est exécutable et compatible avec Chargements. L'authentification Keycloak commune reste
+à intégrer dans ce backend : voir [auth/README.md](../../auth/README.md).
+Les actions de maintenance et d'archivage ne sont pas encore exposées par les routes actuelles.
+
 ## Mon travail
 
 - Ajouter, consulter et modifier un camion.
@@ -249,6 +253,10 @@ Les seules valeurs autorisées sont `LIVRAISON` et `ANNULATION`. La réponse
 avec le même motif retourne la réservation sans changer sa date de libération;
 un motif différent donne `409 Conflict`. Une réservation inconnue répond `404`
 et un motif absent ou invalide répond `422`.
+
+Les horodatages sont produits en UTC avec une précision à la microseconde, compatible avec
+PostgreSQL. La première réponse et une répétition après relecture en base conservent ainsi
+les mêmes dates de création et de libération.
 
 Les opérations réservent et libèrent en verrouillant d'abord la ligne camion,
 puis la réservation, dans cet ordre. La modification de capacité utilise le

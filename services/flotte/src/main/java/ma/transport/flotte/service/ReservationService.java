@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -85,7 +86,7 @@ public class ReservationService {
             throw new ReservationWeightExceededException();
         }
 
-        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);
         ReservationCamion reservation = new ReservationCamion(
                 UUID.randomUUID().toString(),
                 camion.getId(),
@@ -127,7 +128,7 @@ public class ReservationService {
                 return toResponse(reservation);
             }
 
-            reservation.release(request.motif(), OffsetDateTime.now(ZoneOffset.UTC));
+            reservation.release(request.motif(), OffsetDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS));
             return toResponse(reservationRepository.saveAndFlush(reservation));
         });
     }

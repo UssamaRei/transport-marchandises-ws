@@ -3,8 +3,7 @@
 Préparer les marchandises, émettre un bon de livraison et suivre le voyage du camion.
 
 **4 backends Spring Boot, une base PostgreSQL commune sur Neon, des échanges REST / JSON.**
-**Chargements** et **Transports / Suivi** ont une implémentation.
-**Camions** contient actuellement les tests de Hassan, sans application exécutable ;
+**Chargements**, **Camions** et **Transports / Suivi** ont une implémentation exécutable.
 **Bons de livraison** dispose du contrat à implémenter.
 Voir [démarrage, routes et exemples Chargements](services/chargements/README.md).
 

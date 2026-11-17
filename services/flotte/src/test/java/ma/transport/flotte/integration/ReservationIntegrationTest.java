@@ -133,11 +133,12 @@ class ReservationIntegrationTest {
                 .andExpect(jsonPath("$.motifLiberation").doesNotExist())
                 .andReturn().getResponse().getContentAsString();
         String reservationId = objectMapper.readTree(response).get("id").asText();
+        String createdAt = objectMapper.readTree(response).get("createdAt").asText();
 
         mockMvc.perform(get("/api/v1/reservations/{id}", reservationId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(reservationId))
-                .andExpect(jsonPath("$.createdAt").isNotEmpty());
+                .andExpect(jsonPath("$.createdAt").value(createdAt));
         mockMvc.perform(get("/api/v1/reservations").param("transportId", transportId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(reservationId));
