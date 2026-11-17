@@ -50,4 +50,27 @@ déjà appliquées sur Neon. V2 conserve le réceptionnaire, la date et le comme
 Le [contrat Bons](../bons/README.md#contrat-de-preuve-utilisé-par-transports) définit les champs
 `dateReception` (date ISO sans heure), `operationKey` et la réponse attendue en cas de répétition.
 
+## Authentification
+
+Transports utilise le realm Keycloak commun `transport-ws`.
+Voir [la documentation d'authentification](../../auth/README.md)
+pour démarrer Keycloak et obtenir un token avec Postman.
+
+- `ADMIN` et `AGENT` peuvent consulter et effectuer les opérations métier.
+- `LECTEUR` peut consulter uniquement.
+- Le compte technique Camions peut consulter les transports actifs
+  d'un camion avec les filtres `camionId` et `actifs=true`.
+
+Pour ses appels vers Bons et Camions, Transports utilise le compte technique
+`transports-service`. Son secret est fourni par la variable d'environnement
+`TRANSPORTS_CLIENT_SECRET` ; il ne doit pas être enregistré dans Git.
+
+Pour les tests entre plusieurs machines, l'équipe doit utiliser une instance
+Keycloak commune accessible à tous.
+
+## Vérification
+
+Lancer `mvn test` depuis `services/transports`. Ces tests ne remplacent pas
+un test complet avec les services Bons et Camions et la base de test partagée.
+
 [Retour au projet](../../README.md)
