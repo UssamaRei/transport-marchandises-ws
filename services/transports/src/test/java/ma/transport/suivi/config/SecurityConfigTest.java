@@ -125,4 +125,24 @@ class SecurityConfigTest {
                         .header("Authorization", "Bearer camions"))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    void autoriseLeTraitementInterneDesErreurs() throws Exception {
+        mvc.perform(get("/api/v1/transports/test")
+                        .with(request -> {
+                            request.setDispatcherType(
+                                    jakarta.servlet.DispatcherType.ERROR
+                            );
+                            return request;
+                        }))
+                .andExpect(status().isOk());
+
+        when(jwtDecoder.decode("agent"))
+                .thenReturn(token("agent", "AGENT"));
+
+        // Un accès HTTP direct à /error reste refusé.
+        mvc.perform(get("/error")
+                        .header("Authorization", "Bearer agent"))
+                .andExpect(status().isForbidden());
+    }
 }
