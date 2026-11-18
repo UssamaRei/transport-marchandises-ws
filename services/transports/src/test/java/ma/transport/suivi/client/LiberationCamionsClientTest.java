@@ -89,4 +89,36 @@ class LiberationCamionsClientTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, erreur.getStatusCode());
     }
+
+    @Test
+    void accepteReponseCompleteFlottePourLiberation() {
+        serveur.expect(requestTo(
+                        "http://camions.test/api/v1/reservations/res-1/liberation"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(content().json("""
+                    {"motif":"LIVRAISON"}
+                    """))
+                .andRespond(withSuccess("""
+                    {
+                      "id": "res-1",
+                      "camionId": "camion-1",
+                      "transportId": "transport-1",
+                      "poidsKg": 225.000,
+                      "statut": "LIBEREE",
+                      "motifLiberation": "LIVRAISON",
+                      "createdAt": "2026-11-17T12:00:00Z",
+                      "releasedAt": "2026-11-17T13:00:00Z"
+                    }
+                    """, MediaType.APPLICATION_JSON));
+
+        ReservationLiberationResponse resultat =
+                client.libererPourLivraison("res-1");
+
+        assertEquals("res-1", resultat.id());
+        assertEquals("camion-1", resultat.camionId());
+        assertEquals("transport-1", resultat.transportId());
+        assertEquals("LIBEREE", resultat.statut());
+        assertEquals("LIVRAISON", resultat.motifLiberation());
+        serveur.verify();
+    }
 }

@@ -103,4 +103,45 @@ class CamionsClientTest {
         assertEquals(HttpStatus.CONFLICT, erreur.getStatusCode());
         serveur.verify();
     }
+
+    @Test
+    void accepteReponseCompleteFlottePourReservationCreee() {
+        serveur.expect(requestTo("http://camions.test/api/v1/reservations"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(content().json("""
+                    {
+                      "camionId": "camion-1",
+                      "transportId": "transport-1",
+                      "poidsKg": 225.000
+                    }
+                    """))
+                .andRespond(withStatus(HttpStatus.CREATED)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body("""
+                            {
+                              "id": "reservation-1",
+                              "camionId": "camion-1",
+                              "transportId": "transport-1",
+                              "poidsKg": 225.000,
+                              "statut": "ACTIVE",
+                              "motifLiberation": null,
+                              "createdAt": "2026-11-17T12:00:00Z",
+                              "releasedAt": null
+                            }
+                            """));
+
+        ReservationResponse resultat = client.reserver(
+                new ReservationRequest(
+                        "camion-1",
+                        "transport-1",
+                        new BigDecimal("225.000")
+                )
+        );
+
+        assertEquals("reservation-1", resultat.id());
+        assertEquals("camion-1", resultat.camionId());
+        assertEquals("transport-1", resultat.transportId());
+        assertEquals("ACTIVE", resultat.statut());
+        serveur.verify();
+    }
 }
