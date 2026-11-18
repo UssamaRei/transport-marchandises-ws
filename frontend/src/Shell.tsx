@@ -95,10 +95,14 @@ export function Shell() {
           </div>
           <div className="nav-label">VOS MODULES</div>
           <nav aria-label="Navigation principale">
-            <NavLink className="nav-item active" to="/chargements" aria-label="Chargements">
+            <NavLink
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+              to="/chargements"
+            >
               <Icon name="box" />
               <span>Chargements</span>
             </NavLink>
+
             <div className="subnav">
               <NavLink
                 end
@@ -107,6 +111,7 @@ export function Shell() {
               >
                 Tous les chargements
               </NavLink>
+
               {auth.canEdit && (
                 <NavLink
                   to="/chargements/nouveau"
@@ -116,11 +121,11 @@ export function Shell() {
                 </NavLink>
               )}
             </div>
+
             {(
               [
                 { name: "Camions", icon: "truck" },
                 { name: "Bons de livraison", icon: "file" },
-                { name: "Suivi des transports", icon: "route" },
               ] as { name: string; icon: IconName }[]
             ).map((item) => (
               <div className="nav-item live-nav-pending" key={item.name}>
@@ -129,6 +134,14 @@ export function Shell() {
                 <small>Maquette</small>
               </div>
             ))}
+
+            <NavLink
+              to="/transports"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              <Icon name="route" />
+              <span>Suivi des transports</span>
+            </NavLink>
           </nav>
           <div className="sidebar-bottom">
             <div className="help-card">

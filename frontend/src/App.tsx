@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { createBrowserRouter, Link, Navigate, RouterProvider } from "react-router-dom";
 import { AuthProvider } from "./auth";
 import { AuthBoundary, Shell } from "./Shell";
+import { TransportsList, TransportDetail } from "./Transports";
 import {
   ChargementInfos,
   ChargementsList,
@@ -57,6 +58,8 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="/chargements" replace /> },
           { path: "/chargements", element: <ChargementsList /> },
+          { path: "/transports", element: <TransportsList /> },
+          { path: "/transports/:id", element: <TransportDetail /> },
           { path: "/chargements/nouveau", element: <NewChargement /> },
           {
             path: "/chargements/:id",
