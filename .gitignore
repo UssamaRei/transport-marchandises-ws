@@ -39,3 +39,6 @@ tmp/
 
 skills-lock.json
 .secrets/
+
+# Fichiers de connexion fournis individuellement
+/database/*.env

@@ -1,64 +1,67 @@
-# Bons de livraison - Aitlahmous Hmad
+# Bons de livraison
 
-**Spring Boot + PostgreSQL.** Je crée le document de livraison et je conserve la preuve de réception.
+Service Spring Boot du module de livraison, port `8083`. Il émet un bon depuis un chargement validé, conserve un snapshot des données et des lignes, puis enregistre une preuve de réception.
 
-## Mon travail
+## Routes
 
-- Émettre un bon à partir d’un chargement validé.
-- Générer un numéro unique et copier les marchandises dans le bon.
-- Consulter les bons et enregistrer leur confirmation de réception.
+Toutes les routes API commencent par `/api/v1`.
 
-```mermaid
-classDiagram
-    class BonLivraison {
-      id
-      numero
-      statut
-      recepteur
-    }
-    class LigneBon {
-      id
-      designation
-      quantite
-      poidsUnitaireKg
-    }
-    BonLivraison "1" *-- "1..*" LigneBon
+| Méthode et route | Rôle autorisé | Résultat |
+|---|---|---|
+| `POST /api/v1/bons` | `ADMIN`, `AGENT` | Émet un bon depuis un chargement `VALIDE`, réponse `201` |
+| `GET /api/v1/bons/{id}` | `ADMIN`, `AGENT`, `LECTEUR`, `SERVICE_TRANSPORTS` | Retourne le détail et les lignes du snapshot |
+| `POST /api/v1/bons/{id}/preuve-livraison` | `ADMIN`, `AGENT`, `SERVICE_TRANSPORTS` | Enregistre ou rejoue une preuve, réponse `200` |
+| `GET /health` | public | Vérifie que le service répond |
+
+Swagger UI : <http://localhost:8083/swagger-ui.html> ; OpenAPI : <http://localhost:8083/v3/api-docs>.
+
+### Émettre un bon
+
+```http
+POST /api/v1/bons
+Content-Type: application/json
+Authorization: Bearer <JWT>
+
+{"chargementId":"<id-du-chargement>"}
 ```
 
-## Je communique avec qui ?
+Bons appelle `GET /api/v1/chargements/{id}` avec le client technique `bons-service`. Un chargement absent donne `404`, un chargement non `VALIDE` donne `409`, un chargement valide incomplet donne `502`. Un seul bon est autorisé par chargement ; une nouvelle tentative de création donne `409`. Les champs d'adresse, destinataire, camion, poids et lignes sont copiés dans le bon et ne changent plus si le chargement source évolue.
 
-Toutes les routes commencent par `/api/v1`.
+### Lire un bon
 
-| Je fournis | À qui ? |
-|---|---|
-| `POST /bons` : émettre le bon | Frontend / Postman |
-| `GET /bons/{id}` : détail du bon | Transports |
-| `POST /bons/{id}/preuve-livraison` : confirmer la réception | Transports |
+```http
+GET /api/v1/bons/<id>
+Authorization: Bearer <JWT>
+```
 
-**J’appelle Chargements** : `GET /chargements/{id}` pour récupérer un chargement VALIDE.
+La réponse contient `id`, `numero`, `chargementId`, les adresses, `destination`, `poidsTotalKg`, `statut`, les champs de preuve, `createdAt` et `lignes`. Elle inclut les champs `id`, `statut`, `destination` et `poidsTotalKg` attendus par Transports.
 
-**Règle :** un bon par chargement. Le bon garde une copie stable des lignes et des adresses.
+### Confirmer la livraison
 
-## Contrat de preuve utilisé par Transports
+```http
+POST /api/v1/bons/<id>/preuve-livraison
+Content-Type: application/json
+Authorization: Bearer <JWT>
 
-`POST /api/v1/bons/{id}/preuve-livraison` reçoit :
-
-```json
 {
-  "transportId": "transport-1",
+  "transportId": "<id-transport>",
   "receptionnaire": "Mohamed",
   "dateReception": "2026-11-17",
   "commentaire": "Marchandises reçues",
-  "operationKey": "livraison:transport-1"
+  "operationKey": "livraison:<id-transport>"
 }
 ```
 
-Réponse **200 OK**, y compris lors d'une répétition identique :
+`dateReception` suit le format ISO `yyyy-MM-dd`. `commentaire` est facultatif (`null` accepté). Les limites sont : transport 64 caractères, réceptionnaire non blanc 160, commentaire 1 000 et clé 160. `operationKey` doit être exactement `livraison:` suivi de `transportId`.
+
+Le bon est verrouillé pendant l'opération. La preuve et le statut `LIVRE` sont écrits dans la même transaction. Le premier appel stocke `transportId` dans `transport_preuve_id`, le réceptionnaire dans `recepteur`, le commentaire, et la date à minuit UTC dans `livre_le`. La réponse restitue la date civile UTC. Une répétition avec le même transport et contenu renvoie la preuve existante sans doublon (`200`). Un transport différent, un contenu différent, ou un transport qui ne référence pas ce bon donne `409`. Une saisie invalide donne `400`, un bon absent `404`.
+
+Réponse de preuve :
 
 ```json
 {
-  "bonId": "bon-1",
-  "transportId": "transport-1",
+  "bonId": "<id-bon>",
+  "transportId": "<id-transport>",
   "receptionnaire": "Mohamed",
   "dateReception": "2026-11-17",
   "commentaire": "Marchandises reçues",
@@ -66,30 +69,26 @@ Réponse **200 OK**, y compris lors d'une répétition identique :
 }
 ```
 
-- `transportId` : obligatoire, 64 caractères maximum ; le transport doit correspondre au bon.
-- `receptionnaire` : obligatoire, non blanc, 160 caractères maximum. Conserver la valeur acceptée
-  pour que la réponse corresponde à la demande de Transports.
-- `dateReception` : date civile ISO `yyyy-MM-dd`, Java `LocalDate`, sans heure ni fuseau.
-- `commentaire` : facultatif (`null` accepté), 1 000 caractères maximum ; le restituer à l'identique.
-- `operationKey` : doit être `livraison:` suivi de `transportId` ; maximum 160 caractères.
+## Sécurité
 
-Enregistrer la preuve et le statut LIVRE dans une même transaction, en verrouillant le bon.
-Une demande répétée avec le même bon, transport et contenu renvoie la confirmation existante,
-sans nouvel enregistrement. Un autre transport ou un contenu différent pour une preuve déjà
-enregistrée donne **409**. Saisie invalide : **400** ; bon introuvable : **404**.
+Le serveur valide la signature, l'émetteur, la date d'expiration et l'audience `bons-api` du JWT. Les rôles viennent du claim Keycloak `roles`. Le client OAuth2 `bons-service` utilise `BONS_CLIENT_SECRET` en flux `client_credentials` pour lire Chargements avec l'audience `chargements-api`. Transports utilise son client technique `transports-service` pour lire et confirmer le bon. Aucun secret ne doit être placé dans le frontend ni commité.
 
-Stockage dans les colonnes existantes : `transportId` → `transport_preuve_id`,
-`receptionnaire` → `recepteur`, `commentaire` → `commentaire`.
-`livre_le` reste un `timestamptz` : représenter `dateReception` à **00:00 UTC**
-(`dateReception.atStartOfDay().atOffset(ZoneOffset.UTC)`) et reconstruire la date en UTC
-pour la réponse. Cette heure normalisée ne représente pas l'heure réelle de réception.
-La contrainte unique sur `transport_preuve_id` et le bon verrouillé protègent contre les doublons ;
-ne pas créer une seconde preuve pour rejouer la même opération.
+## Lancement local
 
-Authentification : accepter le compte technique `SERVICE_TRANSPORTS` pour cet endpoint,
-avec l'émetteur Keycloak commun et l'audience `bons-api`. Voir [authentification](../../auth/README.md).
-Ce contrat est prêt à implémenter ; le backend Bons n'est pas encore présent dans le dépôt.
+Prérequis : JDK 21, Maven, Keycloak en local. La configuration réelle est gardée dans le fichier privé `services/bons/.env`, ignoré par Git. Le lanceur importe ce fichier dans l'environnement du processus Spring :
 
-Tables gérées : `bon_livraison`, `ligne_bon`, dans la base commune.
+```powershell
+Copy-Item .env.example .env # uniquement lors d'une première configuration
+# Renseigner les identifiants DB et BONS_CLIENT_SECRET dans .env, puis :
+.\run-local.ps1
+```
+
+Ne pas commiter `.env`. Pour une utilisation partagée, privilégier un compte DB Bons à privilèges limités.
+
+Le backend utilise seulement `bon_livraison` et `ligne_bon`, avec `spring.jpa.hibernate.ddl-auto=validate` et `spring.sql.init.mode=never`. Il ne crée ni ne modifie le schéma. Les migrations V1/V2 sont déjà appliquées sur la base partagée : ne pas les rejouer depuis ce module. Les comptes DB de module ne doivent pas recevoir de privilèges de migration.
+
+## Contrat de données source
+
+Chargements retourne `id`, `origine`, `destination`, `destinataireNom`, `destinataireTelephone`, `camionSouhaiteId`, `poidsTotalKg`, `statut` et `lignes` (`id`, `designation`, `quantite`, `poidsUnitaireKg`). Le source doit être `VALIDE`, posséder au moins une ligne et avoir des champs conformes aux tailles du schéma. Le backend Bons vérifie ces conditions avant d'écrire.
 
 [Retour au projet](../../README.md)
