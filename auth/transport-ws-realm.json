@@ -404,5 +404,11 @@
         "SERVICE_TRANSPORTS"
       ]
     }
-  ]
+  ],
+  "loginTheme": "transit",
+  "internationalizationEnabled": true,
+  "supportedLocales": [
+    "fr"
+  ],
+  "defaultLocale": "fr"
 }

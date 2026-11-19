@@ -4,6 +4,9 @@
 Realm : `transport-ws`. Connexion utilisateur : Authorization Code + PKCE (S256).
 Les mots de passe ne passent pas par nos contrôleurs REST.
 
+L'écran de connexion utilise le [thème Transit](themes/transit/README.md), avec
+les mêmes couleurs et polices que le frontend. Il reste servi par Keycloak.
+
 ## Rôles retenus
 
 | Rôle utilisateur | Accès métier |

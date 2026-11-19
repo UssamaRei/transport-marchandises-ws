@@ -1,0 +1,58 @@
+@font-face{font-family:"DM Sans";font-style:normal;font-weight:400 700;font-display:swap;src:url("../fonts/dm-sans-latin.woff2") format("woff2")}
+@font-face{font-family:Manrope;font-style:normal;font-weight:500 800;font-display:swap;src:url("../fonts/manrope-latin.woff2") format("woff2")}
+:root{color-scheme:light;--transit-ink:#253648;--transit-teal:#12988c}
+html.login-pf,html.login-pf body{background:#f6f8fa none;min-height:100%;color:var(--transit-ink)}
+html.login-pf body{margin:0;font-family:"DM Sans","Segoe UI",sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+.transit-auth-shell{display:grid;grid-template-columns:minmax(0,470px) minmax(0,370px);align-items:center;justify-content:center;gap:90px;min-height:100vh;padding:48px 28px}
+.transit-card.card-pf{width:100%;max-width:none;margin:0;padding:40px;border:1px solid #e1e8ec;border-radius:16px;background:#fff;box-shadow:0 12px 55px #23465306;color:var(--transit-ink)}
+.transit-brand{display:flex;align-items:center;gap:10px;margin:0 0 48px;color:#153849;font:800 34px/1.2 Manrope,sans-serif;letter-spacing:-1.9px}
+.transit-brand img{width:38px;height:40px;transform:rotate(-3deg)}
+.transit-brand-dot{color:#13a496}
+.transit-eyebrow{display:block;color:#78909c;font-size:10px;font-weight:600;letter-spacing:1.6px;margin-bottom:14px}
+.transit-card .login-pf-header{position:relative;margin:0 0 14px;text-align:left}
+.transit-card #kc-page-title{margin:0;color:#1b3647;font:750 27px/1.35 Manrope,sans-serif;letter-spacing:-.8px}
+.transit-intro{margin:0 0 30px;color:#748692;line-height:1.8;font-size:13px}
+.transit-card #kc-content{margin:0}
+.transit-card #kc-content-wrapper{margin:0}
+.transit-card #kc-form{margin:0}
+.transit-card .form-group{margin:0 0 21px}
+.transit-card .form-group>label,.transit-card .pf-c-form__label{display:block;margin:0 0 9px;color:#455c6c;font:600 12px/1.5 "DM Sans",sans-serif}
+.transit-card .pf-c-form-control{height:47px;padding:11px 13px;color:#253648;background:#fff;border:1px solid #dbe3e8;border-radius:7px;box-shadow:none;font:400 14px/1.5 "DM Sans",sans-serif;transition:border-color .15s,box-shadow .15s}
+.transit-card .pf-c-form-control:hover{border-color:#a5c7c2}
+.transit-card .pf-c-form-control:focus{border:1px solid #15998a;box-shadow:0 0 0 3px #15998a16;outline:none}
+.transit-card .pf-c-form-control[aria-invalid=true]{border-color:#bd6056}
+.transit-card .pf-c-input-group{display:flex;isolation:isolate;background:transparent;border:1px solid #dbe3e8;border-radius:7px}
+.transit-card .pf-c-input-group:focus-within{border-color:#15998a;box-shadow:0 0 0 3px #15998a16}
+.transit-card .pf-c-input-group .pf-c-form-control{min-width:0;flex:1;border:0;border-radius:7px 0 0 7px;height:45px;box-shadow:none}
+.transit-card .pf-c-input-group .pf-c-button{width:45px;min-width:45px;height:45px;padding:0;border:0;border-radius:0 7px 7px 0;background:#fff;color:#7b929c;box-shadow:none}
+.transit-card .pf-c-input-group .pf-c-button:after{border:0}
+.transit-card .pf-c-input-group .pf-c-button:hover{color:#108b7f;background:#f3f9f6}
+.transit-card .pf-c-input-group .pf-c-button:focus-visible{outline:2px solid #15998a;outline-offset:-4px}
+.transit-card #kc-form-options{font-size:12px;color:#6d8490}
+.transit-card #kc-form-login .login-pf-settings:has(#kc-form-options:empty){display:none}
+.transit-card #kc-form-buttons{margin:28px 0 0;padding:0;width:100%}
+.transit-card #kc-login{height:46px;width:100%;border:0;border-radius:7px;background:#12988c;color:white;font:650 14px/1.5 "DM Sans",sans-serif;box-shadow:0 3px 8px #12988c15;cursor:pointer;transition:background .15s,transform .15s}
+.transit-card #kc-login:hover{background:#0c887d}
+.transit-card #kc-login:focus-visible{outline:3px solid #7bd0c5;outline-offset:3px}
+.transit-card #kc-login:disabled{opacity:.65;cursor:wait}
+.transit-card .kc-feedback-text{color:#a74a40;line-height:1.6;font-size:12px}
+.transit-card #input-error{display:block;margin-top:9px}
+.transit-card .pf-c-alert{margin-bottom:22px;padding:13px 15px;border:1px solid #e2bdb6;border-radius:7px;background:#fff8f6;color:#9f5147;box-shadow:none}
+.transit-card .pf-c-alert__title{font-weight:500;font-size:12px}
+.transit-footnote{margin:22px 0 0;color:#95a4ad;font-size:11px;line-height:1.7;text-align:center}
+.transit-visual{width:100%;color:#234953}
+.transit-visual-kicker{display:block;color:#75978d;font:600 10px/1.5 "DM Sans",sans-serif;letter-spacing:1.8px;margin:0 0 20px}
+.transit-visual img{display:block;width:100%;height:auto;margin:0 0 24px}
+.transit-visual h2{margin:0 0 16px;font:750 29px/1.45 Manrope,sans-serif;letter-spacing:-.8px;color:#355d5c}
+.transit-visual h2 span{color:#139a89}
+.transit-visual p{margin:0;color:#79928d;font-size:13px;line-height:1.9;max-width:315px}
+.transit-stages{display:flex;align-items:center;gap:12px;margin-top:28px;color:#809f96;font-size:11px}
+.transit-stages span{padding:7px 11px;border:1px solid #dce9e3;border-radius:5px;background:#f0f7f3;color:#63877b}
+.transit-stages i{font-style:normal;color:#97b8ab}
+.transit-card a{color:#148d80;text-decoration:none}
+.transit-card a:hover{text-decoration:underline}
+.transit-card #kc-locale{position:absolute;right:0;top:-26px}
+@media(max-width:950px){.transit-auth-shell{grid-template-columns:minmax(0,470px);gap:0;padding:32px 22px}.transit-visual{display:none}}
+@media(max-width:500px){.transit-auth-shell{padding:22px 16px}.transit-card.card-pf{padding:30px 25px;border-radius:13px}.transit-brand{font-size:31px;margin-bottom:38px}.transit-card #kc-page-title{font-size:25px}.transit-intro{font-size:12px}.transit-footnote{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.transit-card input,.transit-card button{transition:none}}

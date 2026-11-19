@@ -34,6 +34,7 @@ services:
       - "127.0.0.1:18090:8090"
     volumes:
       - ../../auth/transport-ws-realm.json:/opt/keycloak/data/import/transport-ws-realm.json:ro
+      - ../../auth/themes/transit:/opt/keycloak/themes/transit:ro
   camions:
     image: eclipse-temurin:21-jre
     entrypoint: ["java", "-jar", "/app/app.jar"]
