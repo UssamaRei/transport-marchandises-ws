@@ -19,10 +19,14 @@ export default defineConfig(({ mode }) => {
           target: env.CAMIONS_PROXY_TARGET || "http://localhost:8081",
           changeOrigin: true,
         },
+        "/api/v1/bons": {
+          target: env.BONS_PROXY_TARGET || "http://localhost:8083",
+          changeOrigin: true,
+        },
         "/api/v1/transports": {
-        target: env.TRANSPORTS_PROXY_TARGET || "http://localhost:8085",
-        changeOrigin: true,
-},
+          target: env.TRANSPORTS_PROXY_TARGET || "http://localhost:8084",
+          changeOrigin: true,
+        },
       },
     },
   };

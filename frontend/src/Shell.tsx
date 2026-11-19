@@ -1,6 +1,6 @@
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { login, logout, useAuth } from "./auth";
-import { Button, Icon, type IconName } from "./components/ui";
+import { Button, Icon } from "./components/ui";
 import { Loading, ToastProvider } from "./components/live";
 
 export function AuthBoundary() {
@@ -73,6 +73,10 @@ export function Shell() {
   const auth = useAuth();
   const location = useLocation();
   const isDetail = /^\/chargements\/[^/]+/.test(location.pathname);
+  const isBonRoute = location.pathname.startsWith("/bons");
+  const isTransportRoute = location.pathname.startsWith("/transports");
+  const sectionPath = isBonRoute ? "/bons" : isTransportRoute ? "/transports" : "/chargements";
+  const sectionLabel = isBonRoute ? "Bons de livraison" : isTransportRoute ? "Suivi des transports" : "Chargements";
   return (
     <ToastProvider>
       <div className="app-shell live-app">
@@ -93,7 +97,7 @@ export function Shell() {
               <small>Espace de l’équipe</small>
             </div>
           </div>
-          <div className="nav-label">VOS MODULES</div>
+            <div className="nav-label">VOS MODULES</div>
           <nav aria-label="Navigation principale">
             <NavLink
               className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
@@ -122,18 +126,19 @@ export function Shell() {
               )}
             </div>
 
-            {(
-              [
-                { name: "Camions", icon: "truck" },
-                { name: "Bons de livraison", icon: "file" },
-              ] as { name: string; icon: IconName }[]
-            ).map((item) => (
-              <div className="nav-item live-nav-pending" key={item.name}>
-                <Icon name={item.icon} />
-                <span>{item.name}</span>
-                <small>Maquette</small>
-              </div>
-            ))}
+            <div className="nav-item live-nav-pending" aria-disabled="true">
+              <Icon name="truck" />
+              <span>Camions</span>
+              <small>Maquette</small>
+            </div>
+
+            <NavLink
+              to="/bons"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              <Icon name="file" />
+              <span>Bons de livraison</span>
+            </NavLink>
 
             <NavLink
               to="/transports"
@@ -149,7 +154,7 @@ export function Shell() {
                 <Icon name="layers" />
               </span>
               <h3>Le projet en images.</h3>
-              <p>Les autres modules sont disponibles dans les maquettes.</p>
+              <p>Les maquettes donnent un aperçu des autres écrans du projet.</p>
               <Link to="/maquettes">
                 Voir les 25 écrans <Icon name="arrow" size={15} />
               </Link>
@@ -177,10 +182,10 @@ export function Shell() {
             <div className="breadcrumbs">
               <span>Espace de gestion</span>
               <Icon name="chevron" size={12} />
-              <Link to="/chargements">
-                <strong>Chargements</strong>
+              <Link to={sectionPath}>
+                <strong>{sectionLabel}</strong>
               </Link>
-              {isDetail && (
+              {(isDetail || (isBonRoute && location.pathname !== "/bons")) && (
                 <>
                   <Icon name="chevron" size={12} />
                   <span className="breadcrumb-id">

@@ -1,0 +1,95 @@
+.bons-page { max-width: 1360px; margin: 0 auto; }
+.bons-heading { margin-bottom: 26px; }
+.bons-layout { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(275px, .8fr); gap: 22px; align-items: start; }
+.bons-main-column, .bons-side-column { min-width: 0; }
+.bons-issue-card { overflow: hidden; }
+.bons-issue-banner { min-height: 142px; padding: 25px 28px; display: flex; align-items: center; gap: 18px; color: #f6fffc; background: linear-gradient(112deg, #0b574f 0%, #117769 56%, #1a9282 100%); position: relative; overflow: hidden; }
+.bons-issue-banner:after { content: ""; position: absolute; width: 240px; height: 240px; border: 1px solid #ffffff20; border-radius: 50%; right: -50px; top: -125px; box-shadow: 0 0 0 25px #ffffff09, 0 0 0 52px #ffffff07; }
+.bons-banner-icon { width: 48px; height: 48px; display: grid; place-items: center; border: 1px solid #ffffff4d; border-radius: 13px; background: #ffffff14; flex: 0 0 auto; }
+.bons-kicker { color: #218c7e; font-size: 9px; letter-spacing: 1.3px; font-weight: 750; }
+.bons-issue-banner .bons-kicker { color: #b5e3d8; }
+.bons-issue-banner h2 { color: white; margin: 4px 0 5px; font: 700 19px/1.35 Manrope, sans-serif; letter-spacing: -.4px; }
+.bons-issue-banner p { max-width: 500px; color: #d3eee8; font-size: 11px; line-height: 1.65; }
+.bons-step-mark { position: relative; z-index: 1; margin-left: auto; display: flex; align-items: center; gap: 8px; color: #d0eae5; font-size: 9px; }
+.bons-step-mark span { width: 23px; height: 23px; border: 1px solid #d0eae570; border-radius: 50%; display: grid; place-items: center; }
+.bons-step-mark span:first-child { background: #ffffff23; color: white; }
+.bons-step-mark i { width: 18px; height: 1px; background: #d0eae570; }
+.bons-issue-form { padding: 25px 27px 27px; }
+.bons-form-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 13px; align-items: end; }
+.bons-form-row .field { margin: 0; }
+.bons-form-row .btn { min-height: 42px; white-space: nowrap; }
+.bons-load-preview { margin-top: 23px; padding: 19px 20px 15px; border: 1px solid #e4eeea; border-radius: 9px; background: #fafdfc; }
+.bons-preview-route { display: flex; align-items: center; gap: 14px; padding-bottom: 18px; border-bottom: 1px solid #edf1ee; }
+.bons-route-point { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #3c5964; }
+.bons-route-point i { width: 8px; height: 8px; border: 2px solid #32a18e; border-radius: 50%; }
+.bons-route-point.destination i { border-color: #e1a65e; }
+.bons-route-line { flex: 1; max-width: 100px; height: 1px; border-top: 1px dashed #b6c9c1; }
+.bons-preview-facts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; padding-top: 16px; }
+.bons-preview-facts span, .bons-document-facts span, .bons-document-route span { display: block; margin-bottom: 5px; color: #97a5aa; font-size: 8px; letter-spacing: .9px; font-weight: 700; }
+.bons-preview-facts strong { color: #49616a; font-size: 11px; font-weight: 650; }
+.bons-snapshot-note { display: flex; align-items: center; gap: 7px; color: #368c78; font-size: 10px; margin-top: 15px; }
+.bons-empty-inline, .bons-readonly-note { display: flex; gap: 10px; align-items: center; padding: 13px 15px; margin-top: 16px; border-radius: 7px; background: #f5f8f7; color: #7c8f92; font-size: 11px; line-height: 1.6; }
+.bons-readonly-note { color: #957b50; background: #fbf7ef; }
+.bons-count { display: inline-flex; align-items: center; gap: 7px; color: #83918f; font-size: 10px; }
+.bons-count i { width: 7px; height: 7px; border-radius: 50%; background: #39a38c; }
+.bons-load-list { padding: 0 20px; }
+.bons-load-row { display: flex; width: 100%; align-items: center; gap: 13px; padding: 15px 3px; text-align: left; color: inherit; border: 0; border-bottom: 1px solid #eff2f2; background: white; cursor: pointer; }
+.bons-load-row:hover, .bons-load-row.selected { background: #f7fbf9; }
+.bons-load-row.selected { box-shadow: inset 3px 0 #1a9784; padding-left: 10px; }
+.bons-load-icon { flex: 0 0 auto; width: 35px; height: 35px; display: grid; place-items: center; color: #258d7c; border: 1px solid #deeee8; border-radius: 9px; background: #f3faf6; }
+.bons-load-text { min-width: 0; flex: 1; }
+.bons-load-text strong { display: block; overflow: hidden; color: #425b65; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.bons-load-text strong i { padding: 0 5px; color: #a1b5ae; font-style: normal; }
+.bons-load-text small { display: block; margin-top: 4px; color: #9ba8aa; font-size: 9px; }
+.bons-load-row > svg:last-child { color: #9baaaa; }
+.bons-empty-state { padding: 32px 18px 38px; text-align: center; }
+.bons-empty-icon { width: 48px; height: 48px; margin: 0 auto 11px; display: grid; place-items: center; color: #258f7d; background: #eff8f4; border-radius: 14px; }
+.bons-empty-state h3 { color: #46616a; font-size: 13px; margin-bottom: 5px; }
+.bons-empty-state p { color: #94a1a5; font-size: 10px; margin-bottom: 11px; }
+.bons-empty-state .inline-link { font-size: 10px; }
+.bons-pagination { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 15px 0 17px; color: #9aa6a8; font-size: 9px; }
+.bons-pagination > div { display: flex; gap: 7px; }
+.bons-pagination .btn { padding: 7px 10px; font-size: 9px; }
+.bons-lookup-card form .field { margin: 2px 0 13px; }
+.bons-lookup-card .btn { width: 100%; justify-content: center; }
+.bons-lookup-foot { margin-top: 15px; padding-top: 13px; border-top: 1px solid #eef1f1; color: #98a4a7; font-size: 10px; line-height: 1.7; }
+.bons-help-card { padding: 22px; background: linear-gradient(145deg, #f4faf6, #fbfcfa); }
+.bons-help-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; color: #258e7e; background: white; border: 1px solid #e3eee8; }
+.bons-help-card h3 { margin: 13px 0 7px; color: #49616a; font: 700 13px Manrope, sans-serif; }
+.bons-help-card p { color: #86989a; font-size: 10px; line-height: 1.7; }
+.bons-help-card a { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; color: #238b7b; font-size: 10px; font-weight: 700; }
+.bons-detail-grid { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(270px, .8fr); gap: 22px; align-items: start; }
+.bons-document-card { padding: 26px 28px 0; }
+.bons-document-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; padding-bottom: 22px; border-bottom: 1px solid #edf1ef; }
+.bons-document-head h2 { margin: 4px 0; color: #37565e; font: 750 22px Manrope, sans-serif; }
+.bons-document-head code { color: #99a6a9; font-size: 9px; overflow-wrap: anywhere; }
+.bons-document-route { display: grid; grid-template-columns: minmax(0,1fr) 30px minmax(0,1fr); align-items: center; gap: 13px; padding: 22px 0; border-bottom: 1px solid #edf1ef; }
+.bons-document-route > svg { color: #3a9c8a; }
+.bons-document-route strong { color: #425f67; font-size: 14px; }
+.bons-document-facts { display: grid; grid-template-columns: repeat(3,1fr); gap: 15px; padding: 19px 0; border-bottom: 1px solid #edf1ef; }
+.bons-document-facts strong, .bons-document-facts small { display: block; color: #4b626a; font-size: 11px; }
+.bons-document-facts small { margin-top: 5px; color: #9aa6a8; font-size: 9px; }
+.bons-lines-heading { display: flex; justify-content: space-between; align-items: center; padding: 19px 0 12px; }
+.bons-lines-heading h3 { color: #47616a; font-size: 12px; }
+.bons-lines-heading p { margin-top: 4px; color: #9ba7a8; font-size: 9px; }
+.bons-lines-table { width: 100%; border-collapse: collapse; }
+.bons-lines-table th { padding: 10px 8px; text-align: left; background: #f8faf9; color: #94a2a3; font-size: 8px; font-weight: 700; letter-spacing: .5px; }
+.bons-lines-table td { padding: 12px 8px; border-bottom: 1px solid #eff2f1; color: #73858a; font-size: 10px; }
+.bons-lines-table td strong { color: #4d646b; font-weight: 600; }
+.bons-total-strip { display: flex; justify-content: space-between; align-items: center; margin: 0 -28px; padding: 17px 28px; background: #f5faf7; color: #428c7c; }
+.bons-total-strip span { font-size: 9px; letter-spacing: 1px; font-weight: 700; }
+.bons-total-strip strong { font: 750 18px Manrope, sans-serif; }
+.bons-proof { padding-top: 4px; }
+.bons-proof dl { margin: 17px 0 0; }
+.bons-proof dl > div { padding: 11px 0; border-top: 1px solid #edf1ef; }
+.bons-proof dt { color: #9aa7a7; font-size: 9px; margin-bottom: 4px; }
+.bons-proof dd { color: #4b626a; font-size: 11px; overflow-wrap: anywhere; }
+.bons-proof-pending { padding: 12px 0 6px; text-align: center; }
+.bons-proof-pending > span { width: 42px; height: 42px; margin: 0 auto 11px; display: grid; place-items: center; border-radius: 50%; color: #b38954; background: #fbf6ed; }
+.bons-proof-pending strong { display: block; color: #60767a; font-size: 12px; }
+.bons-proof-pending p { max-width: 240px; margin: 6px auto 0; color: #96a4a4; font-size: 10px; line-height: 1.7; }
+.bons-integrity-card { display: flex; gap: 12px; padding: 17px; color: #218c7b; background: #f6fbf8; }
+.bons-integrity-card > div strong { color: #547268; font-size: 10px; }
+.bons-integrity-card p { margin-top: 4px; color: #8ea199; font-size: 9px; line-height: 1.6; }
+@media (max-width: 1020px) { .bons-layout, .bons-detail-grid { grid-template-columns: 1fr; } .bons-side-column { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; } }
+@media (max-width: 680px) { .bons-issue-banner { align-items: flex-start; padding: 20px; } .bons-step-mark { display: none; } .bons-issue-form { padding: 19px; } .bons-form-row { grid-template-columns: 1fr; } .bons-form-row .btn { width: 100%; justify-content: center; } .bons-preview-facts, .bons-document-facts { grid-template-columns: 1fr 1fr; } .bons-side-column { display: block; } .bons-document-card { padding: 20px 18px 0; } .bons-total-strip { margin: 0 -18px; padding: 15px 18px; } .bons-document-route { grid-template-columns: minmax(0,1fr) 20px minmax(0,1fr); gap: 8px; } .bons-document-route strong { font-size: 11px; } .bons-lines-table th, .bons-lines-table td { padding: 9px 5px; font-size: 8px; } .bons-load-list { padding: 0 12px; } .bons-load-row { gap: 8px; } .bons-load-row .badge { font-size: 8px; } }
