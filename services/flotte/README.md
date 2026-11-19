@@ -2,8 +2,14 @@
 
 **Spring Boot + PostgreSQL.** Je gère les véhicules, leur capacité et leurs réservations.
 
-L'API est exécutable et compatible avec Chargements. L'authentification Keycloak commune reste
-à intégrer dans ce backend : voir [auth/README.md](../../auth/README.md).
+L'API vérifie les JWT Keycloak du realm commun, audience `camions-api` :
+voir [auth/README.md](../../auth/README.md). Ajouter `Authorization: Bearer <JWT>`
+aux requêtes métier. Sans jeton valide : `401` ; rôle insuffisant : `403`.
+`ADMIN` et `AGENT` gèrent les camions et réservations ; `LECTEUR` consulte.
+`SERVICE_CHARGEMENTS` lit les camions ; `SERVICE_TRANSPORTS` lit, crée et libère
+les réservations. `/health` reste public. Dans Docker, configurer
+`AUTH_JWK_SET_URI` avec l'adresse interne de Keycloak tout en conservant
+`AUTH_ISSUER_URI` égal à son adresse publique.
 Les actions de maintenance et d'archivage ne sont pas encore exposées par les routes actuelles.
 
 ## Mon travail
