@@ -5,6 +5,11 @@ Les quatre modules utilisent les API réelles : **Camions**, **Chargements**,
 la préparation des marchandises, l'émission du bon, le voyage et sa réception.
 Connexion Keycloak avec PKCE, renouvellement du JWT et accès en lecture seule pour LECTEUR.
 
+L’accueil `/` affiche le **tableau de bord** : disponibilité des camions, brouillons,
+transports actifs, bons récents et répartition des transports. Les compteurs viennent
+des API et couvrent toute la base. Chaque module se charge séparément ; utiliser
+**Actualiser** pour relire les données. Les cartes et les listes ouvrent les modules concernés.
+
 ## Lancer
 
 Le lancement complet demande Java 21, Maven, Node.js 22.12+ et Docker Desktop.
@@ -63,6 +68,12 @@ Fermer le frontend déjà ouvert sur le port 5173 avant cette commande. Elle lan
 tests des backends, le frontend et les tests navigateur, puis supprime la pile de test.
 Chrome doit être installé ; `E2E_CHROME_PATH` permet de préciser son exécutable.
 Les captures et résultats sont enregistrés dans `.tools/frontend-systeme/`.
+
+Pour vérifier uniquement le tableau de bord sur les services démarrés :
+`npm run test:e2e -- tests/dashboard.spec.ts` depuis `frontend`.
+Ces tests ne font aucune écriture métier. Les scénarios de panne, de liste vide et
+de données remplies utilisent des réponses locales au navigateur. Les captures
+sont dans `.tools/dashboard-qa/`.
 
 Le résultat est dans `dist/`. En hébergement, servir `index.html` pour les routes de navigation
 et acheminer `/api/v1/chargements`, `/api/v1/camions`, `/api/v1/bons` et `/api/v1/transports` vers leurs backends,

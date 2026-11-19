@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   api,
   errorOf,
@@ -15,8 +15,11 @@ import { ErrorBanner, Loading, Modal, useToast } from "./components/live";
 
 export function CamionsList() {
   const { canEdit } = useAuth();
+  const [params, setParams] = useSearchParams();
   const [page, setPage] = useState(0);
-  const [disponible, setDisponible] = useState("");
+  const disponible = ["true", "false"].includes(params.get("disponible") || "")
+    ? params.get("disponible")!
+    : "";
   const [data, setData] = useState<CamionsPage | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [version, setVersion] = useState(0);
@@ -66,7 +69,7 @@ export function CamionsList() {
             <select
               value={disponible}
               onChange={(event) => {
-                setDisponible(event.target.value);
+                setParams(event.target.value ? { disponible: event.target.value } : {});
                 setPage(0);
               }}
             >

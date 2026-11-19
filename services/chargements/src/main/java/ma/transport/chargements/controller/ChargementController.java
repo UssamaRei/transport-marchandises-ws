@@ -7,6 +7,7 @@ import java.net.URI;
 import java.util.List;
 import ma.transport.chargements.dto.ChargementRequest;
 import ma.transport.chargements.dto.ChargementResume;
+import ma.transport.chargements.dto.ChargementStatistiques;
 import ma.transport.chargements.dto.LigneChargementRequest;
 import ma.transport.chargements.dto.ValidationChargementRequest;
 import ma.transport.chargements.model.Chargement;
@@ -51,6 +52,11 @@ public class ChargementController {
     @GetMapping("/{id}")
     public Chargement findById(@PathVariable String id) {
         return chargementService.findById(id);
+    }
+
+    @GetMapping("/statistiques")
+    public ChargementStatistiques statistiques() {
+        return chargementService.statistiques();
     }
 
     @PutMapping("/{id}")

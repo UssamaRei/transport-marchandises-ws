@@ -152,6 +152,29 @@ class ChargementsIntegrationTest {
     }
 
     @Test
+    void exposesZeroStatisticsForEmptyDatabase() throws Exception {
+        mvc.perform(get(BASE + "/statistiques").with(user("lecteur").roles("LECTEUR")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(0))
+                .andExpect(jsonPath("$.brouillons").value(0))
+                .andExpect(jsonPath("$.valides").value(0));
+    }
+
+    @Test
+    void statisticsCountAllLoadingsBeyondTheFirstPage() throws Exception {
+        for (int i = 0; i < 25; i++) {
+            create("{}");
+        }
+        String id = createReady();
+        validate(id).andExpect(status().isOk());
+        mvc.perform(get(BASE + "/statistiques").with(user("lecteur").roles("LECTEUR")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(26))
+                .andExpect(jsonPath("$.brouillons").value(25))
+                .andExpect(jsonPath("$.valides").value(1));
+    }
+
+    @Test
     void createsEmptyDraftAndExposesLocation() throws Exception {
         String id = create("{}");
         mvc.perform(get(BASE + "/" + id))

@@ -269,9 +269,9 @@ export const api = {
       signal,
     ),
 
-  transports: (page: number, signal?: AbortSignal, camionId = "") =>
+  transports: (page: number, signal?: AbortSignal, camionId = "", statut = "", actifs = false) =>
     request<TransportsPage>(
-      `/api/v1/transports?page=${page}&size=20${camionId ? `&camionId=${encodeURIComponent(camionId)}` : ""}`,
+      `/api/v1/transports?page=${page}&size=20${camionId ? `&camionId=${encodeURIComponent(camionId)}` : ""}${statut ? `&statut=${encodeURIComponent(statut)}` : ""}${actifs ? "&actifs=true" : ""}`,
       "GET",
       undefined,
       signal,

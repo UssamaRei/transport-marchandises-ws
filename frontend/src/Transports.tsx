@@ -18,11 +18,17 @@ function formatDate(value: string | null) {
 export function TransportsList() {
   const [params] = useSearchParams();
   const camionId = params.get("camionId") || "";
+  const statut = params.get("statut") || "";
+  const actifs = params.get("actifs") === "true";
   const [page, setPage] = useState(0);
   const [data, setData] = useState<TransportsPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [version, setVersion] = useState(0);
+
+  useEffect(() => {
+    setPage(0);
+  }, [camionId, statut, actifs]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -32,7 +38,7 @@ export function TransportsList() {
     setData(null);
 
     api
-      .transports(page, controller.signal, camionId)
+      .transports(page, controller.signal, camionId, statut, actifs)
       .then(setData)
       .catch((err: unknown) => {
         if (!controller.signal.aborted) {
@@ -46,7 +52,7 @@ export function TransportsList() {
       });
 
     return () => controller.abort();
-  }, [page, version, camionId]);
+  }, [page, version, camionId, statut, actifs]);
 
   return (
     <>
@@ -57,16 +63,22 @@ export function TransportsList() {
             Transports<span className="title-dot">.</span>
           </h1>
           <p>Consultez et planifiez vos transports.</p>
-          {camionId && (
+          {(camionId || statut || actifs) && (
             <p>
-              Transports du camion sélectionné ·{" "}
-              <Link to="/transports">Voir tous les transports</Link>
+              {camionId
+                ? "Camion sélectionné"
+                : statut
+                  ? `Statut : ${statut}`
+                  : "Transports actifs"}{" "}
+              · <Link to="/transports">Voir tous les transports</Link>
             </p>
           )}
         </div>
       </div>
 
-      <Card title="Tous les transports">
+      <Card
+        title={camionId || statut || actifs ? "Transports sélectionnés" : "Tous les transports"}
+      >
         {loading && <Loading />}
 
         {error && (

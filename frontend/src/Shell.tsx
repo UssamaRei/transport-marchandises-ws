@@ -73,24 +73,29 @@ export function AuthBoundary() {
 export function Shell() {
   const auth = useAuth();
   const location = useLocation();
+  const isDashboard = location.pathname === "/";
   const isDetail = /^\/chargements\/[^/]+/.test(location.pathname);
   const isBonRoute = location.pathname.startsWith("/bons");
   const isTransportRoute = location.pathname.startsWith("/transports");
   const isCamionRoute = location.pathname.startsWith("/camions");
-  const sectionPath = isBonRoute
-    ? "/bons"
-    : isTransportRoute
-      ? "/transports"
-      : isCamionRoute
-        ? "/camions"
-        : "/chargements";
-  const sectionLabel = isBonRoute
-    ? "Bons de livraison"
-    : isTransportRoute
-      ? "Suivi des transports"
-      : isCamionRoute
-        ? "Camions"
-        : "Chargements";
+  const sectionPath = isDashboard
+    ? "/"
+    : isBonRoute
+      ? "/bons"
+      : isTransportRoute
+        ? "/transports"
+        : isCamionRoute
+          ? "/camions"
+          : "/chargements";
+  const sectionLabel = isDashboard
+    ? "Tableau de bord"
+    : isBonRoute
+      ? "Bons de livraison"
+      : isTransportRoute
+        ? "Suivi des transports"
+        : isCamionRoute
+          ? "Camions"
+          : "Chargements";
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const id =
@@ -109,7 +114,7 @@ export function Shell() {
           Aller au contenu
         </a>
         <aside className="sidebar">
-          <Link className="brand" to="/chargements" aria-label="Transit, accueil">
+          <Link className="brand" to="/" aria-label="Transit, accueil">
             <span className="logo-mark">
               <Icon name="route" size={25} />
             </span>
@@ -124,6 +129,14 @@ export function Shell() {
           </div>
           <div className="nav-label">VOS MODULES</div>
           <nav aria-label="Navigation principale">
+            <NavLink
+              end
+              to="/"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              <Icon name="grid" />
+              <span>Tableau de bord</span>
+            </NavLink>
             <NavLink
               className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
               to="/chargements"
