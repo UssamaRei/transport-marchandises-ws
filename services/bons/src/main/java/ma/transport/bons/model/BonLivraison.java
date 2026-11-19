@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 @Entity
 @Table(name = "bon_livraison", uniqueConstraints = {
@@ -42,6 +44,7 @@ public class BonLivraison {
     @Column(length = 1000)
     private String commentaire;
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
+    @Generated(event = EventType.INSERT)
     private OffsetDateTime createdAt;
     @OneToMany(mappedBy = "bon", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("id ASC")
