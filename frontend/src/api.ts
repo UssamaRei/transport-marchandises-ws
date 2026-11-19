@@ -61,6 +61,25 @@ export type Transport = {
   statut: string;
 };
 
+export type Bon = {
+  id: string;
+  numero: string;
+  chargementId: string;
+  camionSouhaiteId: string;
+  origine: string;
+  destination: string;
+  destinataireNom: string;
+  destinataireTelephone: string | null;
+  poidsTotalKg: number;
+  statut: "EMIS" | "LIVRE";
+  transportId: string | null;
+  recepteur: string | null;
+  dateReception: string | null;
+  commentaire: string | null;
+  createdAt: string | null;
+  lignes: Ligne[];
+};
+
 export type TransportsPage = {
   content: Transport[];
   number: number;
@@ -237,6 +256,12 @@ export const api = {
       undefined,
       signal,
     ),
+
+  creerBon: (chargementId: string) =>
+    request<Bon>("/api/v1/bons", "POST", { chargementId }),
+
+  bon: (id: string, signal?: AbortSignal) =>
+    request<Bon>(`/api/v1/bons/${encodeURIComponent(id)}`, "GET", undefined, signal),
 };
 
 export const formatKg = (value: number) =>
