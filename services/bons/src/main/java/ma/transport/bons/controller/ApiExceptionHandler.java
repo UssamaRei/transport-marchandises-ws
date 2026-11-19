@@ -30,6 +30,11 @@ public class ApiExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, "Requête invalide : vérifier le JSON et les types des champs.", Map.of());
     }
 
+    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+    ResponseEntity<ApiError> parameter(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException e) {
+        return error(HttpStatus.BAD_REQUEST, "Paramètre de recherche invalide.", Map.of());
+    }
+
     @ExceptionHandler(DataAccessResourceFailureException.class)
     ResponseEntity<ApiError> unavailable(DataAccessResourceFailureException e) {
         return error(HttpStatus.SERVICE_UNAVAILABLE, "La base de données est temporairement indisponible.", Map.of());

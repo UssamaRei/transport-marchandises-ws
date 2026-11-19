@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.data.domain.Page;
+import ma.transport.bons.dto.BonResumeResponse;
+import ma.transport.bons.model.StatutBon;
 
 @RestController
 @RequestMapping("/api/v1/bons")
@@ -30,6 +34,13 @@ public class BonController {
     @GetMapping("/{id}")
     public BonResponse obtenir(@PathVariable String id) {
         return BonResponse.from(service.obtenir(id));
+    }
+
+    @GetMapping
+    public Page<BonResumeResponse> lister(@RequestParam(defaultValue = "0") int page,
+                                          @RequestParam(defaultValue = "20") int size,
+                                          @RequestParam(required = false) StatutBon statut) {
+        return service.lister(page, size, statut);
     }
 
     @PostMapping("/{id}/preuve-livraison")

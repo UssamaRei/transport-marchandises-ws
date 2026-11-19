@@ -8,6 +8,7 @@ Toutes les routes API commencent par `/api/v1`.
 
 | Méthode et route | Rôle autorisé | Résultat |
 |---|---|---|
+| `GET /api/v1/bons?page=0&size=20&statut=EMIS` | `ADMIN`, `AGENT`, `LECTEUR`, `SERVICE_TRANSPORTS` | Liste paginée des bons ; filtre `statut` facultatif, taille de 1 à 100 |
 | `POST /api/v1/bons` | `ADMIN`, `AGENT` | Émet un bon depuis un chargement `VALIDE`, réponse `201` |
 | `GET /api/v1/bons/{id}` | `ADMIN`, `AGENT`, `LECTEUR`, `SERVICE_TRANSPORTS` | Retourne le détail et les lignes du snapshot |
 | `POST /api/v1/bons/{id}/preuve-livraison` | `ADMIN`, `AGENT`, `SERVICE_TRANSPORTS` | Enregistre ou rejoue une preuve, réponse `200` |

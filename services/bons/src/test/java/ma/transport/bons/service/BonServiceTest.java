@@ -40,6 +40,23 @@ class BonServiceTest {
     void setUp() { service = new BonService(repository, chargementsClient); }
 
     @Test
+    void listeLesBonsSansChargerLesLignes() {
+        BonLivraison bon = bonEmis("bon-1");
+        when(repository.findAll(org.mockito.ArgumentMatchers.any(org.springframework.data.domain.Pageable.class)))
+                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(bon)));
+        var page = service.lister(0, 20, null);
+        assertThat(page.getContent()).singleElement().satisfies(item -> assertThat(item.id()).isEqualTo("bon-1"));
+        verify(chargementsClient, never()).getChargement(any());
+    }
+
+    @Test
+    void refuseUnePaginationHorsLimites() {
+        assertThatThrownBy(() -> service.lister(0, 101, null)).isInstanceOf(BonException.class)
+                .satisfies(error -> assertThat(((BonException) error).getStatus()).isEqualTo(HttpStatus.BAD_REQUEST));
+        org.mockito.Mockito.verifyNoInteractions(repository);
+    }
+
+    @Test
     void emetUnBonAvecSnapshotExactDuChargementValide() {
         when(repository.findByChargementId("load-1")).thenReturn(Optional.empty());
         when(chargementsClient.getChargement("load-1")).thenReturn(chargement("VALIDE"));

@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/health", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/bons/**").hasAnyRole("ADMIN", "AGENT", "LECTEUR", "SERVICE_TRANSPORTS")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/bons", "/api/v1/bons/**").hasAnyRole("ADMIN", "AGENT", "LECTEUR", "SERVICE_TRANSPORTS")
                         .requestMatchers(HttpMethod.POST, "/api/v1/bons/*/preuve-livraison").hasAnyRole("ADMIN", "AGENT", "SERVICE_TRANSPORTS")
                         .requestMatchers(HttpMethod.POST, "/api/v1/bons").hasAnyRole("ADMIN", "AGENT")
                         .anyRequest().denyAll())

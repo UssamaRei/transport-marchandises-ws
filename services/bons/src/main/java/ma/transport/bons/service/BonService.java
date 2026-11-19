@@ -8,6 +8,10 @@ import ma.transport.bons.dto.ChargementDetails;
 import ma.transport.bons.dto.PreuveLivraisonRequest;
 import ma.transport.bons.dto.PreuveLivraisonResponse;
 import ma.transport.bons.dto.CreerBonRequest;
+import ma.transport.bons.dto.BonResumeResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import ma.transport.bons.exception.BonException;
 import ma.transport.bons.model.BonLivraison;
 import ma.transport.bons.model.LigneBon;
@@ -58,6 +62,16 @@ public class BonService {
         } catch (DataIntegrityViolationException error) {
             throw new BonException(HttpStatus.CONFLICT, "Un bon existe déjà pour ce chargement.");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Page<BonResumeResponse> lister(int page, int size, StatutBon statut) {
+        if (page < 0 || size < 1 || size > 100) {
+            throw new BonException(HttpStatus.BAD_REQUEST, "Page invalide ou taille hors limites : 1 à 100.");
+        }
+        PageRequest pagination = PageRequest.of(page, size, Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id")));
+        Page<BonLivraison> bons = statut == null ? repository.findAll(pagination) : repository.findByStatut(statut, pagination);
+        return bons.map(BonResumeResponse::from);
     }
 
     @Transactional(readOnly = true)

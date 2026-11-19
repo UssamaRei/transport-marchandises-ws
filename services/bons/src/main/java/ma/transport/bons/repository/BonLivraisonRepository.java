@@ -10,6 +10,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface BonLivraisonRepository extends JpaRepository<BonLivraison, String> {
+    org.springframework.data.domain.Page<BonLivraison> findByStatut(
+            ma.transport.bons.model.StatutBon statut, org.springframework.data.domain.Pageable pageable);
+
     Optional<BonLivraison> findByChargementId(String chargementId);
 
     @EntityGraph(attributePaths = "lignes")

@@ -420,6 +420,16 @@ class SystemTest(unittest.TestCase):
         result = compose('exec', '-T', 'db', 'psql', '-U', 'postgres', '-d', 'transport_test', '-Atc', sql)
         self.assertEqual(result.stdout.strip(), '0')
 
+    def test_16_bons_list_pagination_and_filter(self):
+        bon = self.bon(self.loading(self.truck()))
+        page = self.call('bons', '/bons?page=0&size=1', role='LECTEUR')
+        self.assertEqual(len(page['content']), 1)
+        self.assertEqual(page['content'][0]['id'], bon['id'])
+        self.assertNotIn('lignes', page['content'][0])
+        self.assertEqual(self.call('bons', '/bons?statut=EMIS&size=1')['content'][0]['statut'], 'EMIS')
+        self.call('bons', '/bons?size=101', expected=400)
+        self.call('bons', '/bons?statut=INVALIDE', expected=400)
+
 
 if __name__ == '__main__':
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(SystemTest)
