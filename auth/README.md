@@ -90,7 +90,8 @@ de leurs destinataires. Le realm ajoute les rôles dans le claim **`roles`**.
 
 ### À reprendre par chaque étudiant
 
-Chargements est déjà protégé dans cette branche. Pour les autres services :
+Les quatre backends sont protégés dans la branche d'intégration. Les configurations
+suivantes expliquent le fonctionnement commun :
 
 1. Ajouter `spring-boot-starter-oauth2-resource-server`, `spring-boot-starter-oauth2-client`
    et `spring-security-test` (test).

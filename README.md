@@ -7,8 +7,10 @@ Préparer les marchandises, émettre un bon de livraison et suivre le voyage du 
 Voir [démarrage, routes et exemples Chargements](services/chargements/README.md).
 
 **Authentification :** [Keycloak, rôles, connexion Postman et intégration des backends](auth/README.md).
-Chargements, Bons et Transports vérifient les JWT et utilisent leurs comptes techniques pour les appels inter-services.
-L'intégration Keycloak de Camions reste à terminer.
+Les quatre backends vérifient les JWT du realm commun. Chargements, Bons et Transports
+utilisent leurs comptes techniques pour les appels inter-services.
+
+**Intégration des API, sans frontend :** [lancer les tests des quatre services](tests/integration/README.md).
 
 **Interface :** [frontend Transit](frontend/README.md), avec les cinq vues Chargements connectées
 aux API et les autres écrans conservés en maquettes. Sur Windows, démarrer Docker Desktop puis
