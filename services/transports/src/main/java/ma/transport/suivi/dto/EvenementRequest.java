@@ -12,4 +12,7 @@ public record EvenementRequest(
         BigDecimal latitude,
         BigDecimal longitude
 ) {
+    public EvenementRequest {
+        dateEvenement = Dates.normaliser(dateEvenement);
+    }
 }

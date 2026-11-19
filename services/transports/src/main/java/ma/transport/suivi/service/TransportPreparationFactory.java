@@ -2,6 +2,7 @@ package ma.transport.suivi.service;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 
 import ma.transport.suivi.dto.BonDetails;
 import ma.transport.suivi.dto.PlanificationRequest;
@@ -58,7 +59,7 @@ public class TransportPreparationFactory {
                     bon.destination(),
                     demande.departPrevu(),
                     demande.operationKey(),
-                    OffsetDateTime.now(ZoneOffset.UTC)
+                    OffsetDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS)
             );
         } catch (IllegalArgumentException erreur) {
             throw new ResponseStatusException(
