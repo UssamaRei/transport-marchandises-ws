@@ -6,6 +6,7 @@ services:
     env_file:
       - ${WS_CAMIONS_ENV_FILE:?Lancer demarrer-local.ps1 avec les fichiers prives}
     environment:
+      AUTH_JWK_SET_URI: http://keycloak:8090/realms/transport-ws/protocol/openid-connect/certs
       SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
       SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 0
     volumes:
