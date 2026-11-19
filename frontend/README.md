@@ -1,7 +1,8 @@
 # Frontend Transit
 
-Les vues **Chargements** et **Bons de livraison** utilisent les API réelles : préparation et validation
-des chargements, émission d’un bon depuis un chargement validé, puis consultation du snapshot et de la preuve.
+Les quatre modules utilisent les API réelles : **Camions**, **Chargements**,
+**Bons de livraison** et **Transports**. Le parcours relie la création d'un camion,
+la préparation des marchandises, l'émission du bon, le voyage et sa réception.
 Connexion Keycloak avec PKCE, renouvellement du JWT et accès en lecture seule pour LECTEUR.
 
 ## Lancer
@@ -14,17 +15,16 @@ Sur ce PC, depuis la racine du dépôt, ouvrir Docker Desktop puis exécuter :
 .\demarrer-local.ps1
 ```
 
-Le script construit les deux backends, lance Camions, Chargements et Keycloak, puis le frontend.
-Il utilise les fichiers privés `camions_app.env` et `chargements_app.env` du dossier
+Le script construit les quatre backends, lance les applications et Keycloak, puis le frontend.
+Il utilise les fichiers privés `camions_app.env`, `chargements_app.env`, `bons_app.env`
+et `transports_app.env` du dossier
 `Desktop/Neon-WS-Credentials`. Un autre dossier peut être fourni avec `-CredentialsDirectory`.
 Ces backends utilisent la vraie base commune ; les données saisies dans l'interface y sont enregistrées.
 Ctrl+C arrête Vite ; les backends restent dans Docker Desktop.
 
 ### Frontend seul
 
-Prérequis : Node.js 22.12+ et npm. Démarrer d'abord Keycloak et les backends
-[Chargements](../services/chargements/README.md), [Camions](../services/flotte/README.md) et
-[Bons](../services/bons/README.md).
+Prérequis : Node.js 22.12+ et npm. Démarrer d'abord Keycloak et les quatre backends.
 
 ```powershell
 cd frontend
@@ -42,7 +42,7 @@ passent par le proxy Vite en développement.
 Copier `.env.example` vers `.env.local` uniquement pour changer les adresses.
 Les redirections Keycloak doivent autoriser l'adresse du frontend, y compris la déconnexion.
 
-Les écrans Figma non connectés sont conservés à **`/maquettes`**, avec une bannière indiquant qu'ils
+Les écrans Figma d'origine sont conservés à **`/maquettes`**, avec une bannière indiquant qu'ils
 utilisent des données de démonstration. Ils ne modifient pas la base et ne prouvent pas
 qu'un backend est implémenté. La recherche de chargements filtre la page affichée.
 
@@ -52,6 +52,17 @@ qu'un backend est implémenté. La recherche de chargements filtre la page affic
 npm run typecheck
 npm run build
 ```
+
+Pour vérifier le parcours complet dans Chrome avec une base jetable, depuis la racine :
+
+```powershell
+python tests/integration/run_frontend.py
+```
+
+Fermer le frontend déjà ouvert sur le port 5173 avant cette commande. Elle lance les
+tests des backends, le frontend et les tests navigateur, puis supprime la pile de test.
+Chrome doit être installé ; `E2E_CHROME_PATH` permet de préciser son exécutable.
+Les captures et résultats sont enregistrés dans `.tools/frontend-systeme/`.
 
 Le résultat est dans `dist/`. En hébergement, servir `index.html` pour les routes de navigation
 et acheminer `/api/v1/chargements`, `/api/v1/camions`, `/api/v1/bons` et `/api/v1/transports` vers leurs backends,

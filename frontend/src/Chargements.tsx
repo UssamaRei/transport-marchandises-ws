@@ -950,6 +950,14 @@ export function Validation() {
         >
           <div className="form-body">
             <Notice>Votre chargement est prêt pour l’émission d’un bon de livraison.</Notice>
+            {canEdit && (
+              <Link
+                className="btn workflow-next"
+                to={`/bons?chargementId=${encodeURIComponent(data.id)}`}
+              >
+                Préparer le bon de livraison <Icon name="arrow" size={16} />
+              </Link>
+            )}
             <div className="live-facts">
               <div>
                 <span>Trajet</span>

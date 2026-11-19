@@ -3,6 +3,7 @@ import { createBrowserRouter, Link, Navigate, RouterProvider } from "react-route
 import { AuthProvider } from "./auth";
 import { AuthBoundary, Shell } from "./Shell";
 import { TransportsList, TransportDetail } from "./Transports";
+import { CamionsList, CamionDetail } from "./Camions";
 import { BonDetail, BonsList } from "./Bons";
 import {
   ChargementInfos,
@@ -59,6 +60,8 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="/chargements" replace /> },
           { path: "/chargements", element: <ChargementsList /> },
+          { path: "/camions", element: <CamionsList /> },
+          { path: "/camions/:id", element: <CamionDetail /> },
           { path: "/transports", element: <TransportsList /> },
           { path: "/transports/:id", element: <TransportDetail /> },
           { path: "/bons", element: <BonsList /> },

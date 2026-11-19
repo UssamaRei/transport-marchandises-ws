@@ -221,12 +221,14 @@ function Button({
   );
 }
 function Card({
+  id,
   title,
   subtitle,
   action,
   children,
   className = "",
 }: {
+  id?: string;
   title?: string;
   subtitle?: string;
   action?: ReactNode;
@@ -234,7 +236,7 @@ function Card({
   className?: string;
 }) {
   return (
-    <section className={`card ${className}`}>
+    <section id={id} className={`card ${className}`}>
       {title && (
         <div className="card-heading">
           <div>

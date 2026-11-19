@@ -42,6 +42,81 @@
   font-weight: 600;
   font-size: 12px;
 }
+.transport-action-fields { border: 0; min-width: 0; }
+.workflow-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.workflow-next {
+  margin-bottom: 24px;
+}
+.workflow-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  padding: 26px;
+}
+.workflow-facts > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+.workflow-facts > div > span:first-child {
+  color: #687c85;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+.workflow-facts strong {
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+.fleet-filter {
+  max-width: 360px;
+}
+.live-app .bons-document-head h2,
+.live-app .bons-document-head code {
+  overflow-wrap: anywhere;
+}
+.live-app .bons-document-head {
+  min-width: 0;
+  gap: 12px;
+}
+.live-app .bons-document-head > div {
+  min-width: 0;
+}
+.live-app .bons-detail-grid > *, .live-app .bons-layout > * { min-width: 0; }
+@media (max-width: 1020px) {
+  .live-app .bons-detail-grid, .live-app .bons-layout { grid-template-columns: minmax(0, 1fr); }
+}
+.live-app .bons-page .bons-loads-card .bons-pagination {
+  padding: 14px;
+}
+.live-app .bons-page .bons-document-facts strong {
+  font-size: 13px;
+}
+.live-app .bons-page .bons-document-facts small,
+.live-app .bons-page .bons-proof dd {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 700px) {
+  .workflow-facts {
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    padding: 20px;
+  }
+  .workflow-facts strong {
+    font-size: 16px;
+  }
+  .live-app .table-footer {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
 .live-skip {
   position: fixed;
   top: 8px;

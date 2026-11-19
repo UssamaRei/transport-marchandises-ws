@@ -1,4 +1,5 @@
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { login, logout, useAuth } from "./auth";
 import { Button, Icon } from "./components/ui";
 import { Loading, ToastProvider } from "./components/live";
@@ -27,8 +28,8 @@ export function AuthBoundary() {
           <br />à chaque étape<span className="title-dot">.</span>
         </h1>
         <p>
-          Retrouvez vos chargements, préparez vos marchandises et validez leur transport dans un
-          même espace.
+          Gérez vos camions, préparez les marchandises et suivez chaque livraison dans un même
+          espace.
         </p>
         {auth.error ? (
           <>
@@ -75,8 +76,32 @@ export function Shell() {
   const isDetail = /^\/chargements\/[^/]+/.test(location.pathname);
   const isBonRoute = location.pathname.startsWith("/bons");
   const isTransportRoute = location.pathname.startsWith("/transports");
-  const sectionPath = isBonRoute ? "/bons" : isTransportRoute ? "/transports" : "/chargements";
-  const sectionLabel = isBonRoute ? "Bons de livraison" : isTransportRoute ? "Suivi des transports" : "Chargements";
+  const isCamionRoute = location.pathname.startsWith("/camions");
+  const sectionPath = isBonRoute
+    ? "/bons"
+    : isTransportRoute
+      ? "/transports"
+      : isCamionRoute
+        ? "/camions"
+        : "/chargements";
+  const sectionLabel = isBonRoute
+    ? "Bons de livraison"
+    : isTransportRoute
+      ? "Suivi des transports"
+      : isCamionRoute
+        ? "Camions"
+        : "Chargements";
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    const id =
+      isBonRoute && query.has("chargementId")
+        ? "emettre-bon"
+        : isTransportRoute && query.has("bonId")
+          ? "planifier-transport"
+          : "";
+    if (id) document.getElementById(id)?.scrollIntoView({ block: "start" });
+    else window.scrollTo(0, 0);
+  }, [location.pathname, location.search, isBonRoute, isTransportRoute]);
   return (
     <ToastProvider>
       <div className="app-shell live-app">
@@ -97,7 +122,7 @@ export function Shell() {
               <small>Espace de l’équipe</small>
             </div>
           </div>
-            <div className="nav-label">VOS MODULES</div>
+          <div className="nav-label">VOS MODULES</div>
           <nav aria-label="Navigation principale">
             <NavLink
               className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
@@ -126,11 +151,13 @@ export function Shell() {
               )}
             </div>
 
-            <div className="nav-item live-nav-pending" aria-disabled="true">
+            <NavLink
+              to="/camions"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
               <Icon name="truck" />
               <span>Camions</span>
-              <small>Maquette</small>
-            </div>
+            </NavLink>
 
             <NavLink
               to="/bons"
@@ -185,7 +212,7 @@ export function Shell() {
               <Link to={sectionPath}>
                 <strong>{sectionLabel}</strong>
               </Link>
-              {(isDetail || (isBonRoute && location.pathname !== "/bons")) && (
+              {(isDetail || location.pathname !== sectionPath) && (
                 <>
                   <Icon name="chevron" size={12} />
                   <span className="breadcrumb-id">
@@ -218,14 +245,14 @@ export function Shell() {
                 <Icon name="alert" size={32} />
                 <h1>Accès non attribué</h1>
                 <p>
-                  Votre compte est connecté, mais aucun rôle ne vous permet de consulter les
-                  chargements. Contactez le responsable de l’équipe.
+                  Votre compte est connecté, mais aucun rôle ne vous permet de consulter les les
+                  données. Contactez le responsable de l’équipe.
                 </p>
               </div>
             )}
             <footer className="main-footer">
               <span>© {new Date().getFullYear()} Transit. La logistique, simplement.</span>
-              <span>Gestion des chargements</span>
+              <span>Transport de marchandises</span>
             </footer>
           </main>
         </div>

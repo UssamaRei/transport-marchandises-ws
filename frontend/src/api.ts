@@ -41,6 +41,7 @@ export type Camion = {
   etat: string;
   archive: boolean;
   disponible: boolean;
+  createdAt: string;
 };
 
 export type CamionsPage = {
@@ -59,6 +60,12 @@ export type Transport = {
   poidsKg: number | null;
   departPrevu: string | null;
   statut: string;
+  reservationId: string | null;
+  departReel: string | null;
+  arriveeReelle: string | null;
+  preuveConfirmee: boolean;
+  liberationConfirmee: boolean;
+  syncEtat: string;
 };
 
 export type Bon = {
@@ -78,6 +85,24 @@ export type Bon = {
   commentaire: string | null;
   createdAt: string | null;
   lignes: Ligne[];
+};
+
+export type BonResume = Pick<
+  Bon,
+  | "id"
+  | "numero"
+  | "chargementId"
+  | "camionSouhaiteId"
+  | "destination"
+  | "poidsTotalKg"
+  | "statut"
+  | "createdAt"
+>;
+export type BonsPage = {
+  content: BonResume[];
+  number: number;
+  totalPages: number;
+  totalElements: number;
 };
 
 export type TransportsPage = {
@@ -111,7 +136,7 @@ export class ApiError extends Error {
 
 const base = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 
-async function request<T>(
+export async function request<T>(
   path: string,
   method = "GET",
   data?: unknown,
@@ -175,7 +200,10 @@ async function request<T>(
         ? "Votre rôle ne permet pas cette action."
         : response.status === 401
           ? "La session n’est plus valide. Reconnectez-vous."
-          : error.message || `L’opération a échoué (${response.status}).`;
+          : error.message ||
+            (response.status === 409
+              ? "Les données ont changé ou cette opération existe déjà. Actualisez avant de continuer."
+              : `L’opération a échoué (${response.status}).`);
 
     throw new ApiError(message, response.status, error.erreurs || {});
   }
@@ -193,37 +221,23 @@ export const api = {
   detail: (id: string, signal?: AbortSignal) =>
     request<Chargement>(idPath(id), "GET", undefined, signal),
 
-  create: (data: Infos) =>
-    request<Chargement>(path, "POST", data),
+  create: (data: Infos) => request<Chargement>(path, "POST", data),
 
-  update: (id: string, data: Infos) =>
-    request<Chargement>(idPath(id), "PUT", data),
+  update: (id: string, data: Infos) => request<Chargement>(idPath(id), "PUT", data),
 
-  delete: (id: string) =>
-    request<void>(idPath(id), "DELETE"),
+  delete: (id: string) => request<void>(idPath(id), "DELETE"),
 
   addLigne: (id: string, data: LigneInput) =>
     request<Chargement>(`${idPath(id)}/lignes`, "POST", data),
 
   updateLigne: (id: string, ligneId: string, data: LigneInput) =>
-    request<Chargement>(
-      `${idPath(id)}/lignes/${encodeURIComponent(ligneId)}`,
-      "PUT",
-      data,
-    ),
+    request<Chargement>(`${idPath(id)}/lignes/${encodeURIComponent(ligneId)}`, "PUT", data),
 
   deleteLigne: (id: string, ligneId: string) =>
-    request<Chargement>(
-      `${idPath(id)}/lignes/${encodeURIComponent(ligneId)}`,
-      "DELETE",
-    ),
+    request<Chargement>(`${idPath(id)}/lignes/${encodeURIComponent(ligneId)}`, "DELETE"),
 
   validate: (id: string, camionId: string) =>
-    request<Chargement>(
-      `${idPath(id)}/validation`,
-      "POST",
-      { camionId },
-    ),
+    request<Chargement>(`${idPath(id)}/validation`, "POST", { camionId }),
 
   camions: (page: number, signal?: AbortSignal) =>
     request<CamionsPage>(
@@ -233,21 +247,38 @@ export const api = {
       signal,
     ),
 
-  transports: (page: number, signal?: AbortSignal) =>
+  flotte: (page: number, disponible: string, signal?: AbortSignal) =>
+    request<CamionsPage>(
+      `/api/v1/camions?page=${page}&size=20${disponible ? `&disponible=${disponible}` : ""}`,
+      "GET",
+      undefined,
+      signal,
+    ),
+  camion: (id: string, signal?: AbortSignal) =>
+    request<Camion>(`/api/v1/camions/${encodeURIComponent(id)}`, "GET", undefined, signal),
+  creerCamion: (data: { immatriculation: string; capaciteKg: number }) =>
+    request<Camion>("/api/v1/camions", "POST", data),
+  modifierCamion: (id: string, data: { immatriculation: string; capaciteKg: number }) =>
+    request<Camion>(`/api/v1/camions/${encodeURIComponent(id)}`, "PATCH", data),
+
+  bons: (page: number, signal?: AbortSignal, statut = "") =>
+    request<BonsPage>(
+      `/api/v1/bons?page=${page}&size=20${statut ? `&statut=${statut}` : ""}`,
+      "GET",
+      undefined,
+      signal,
+    ),
+
+  transports: (page: number, signal?: AbortSignal, camionId = "") =>
     request<TransportsPage>(
-      `/api/v1/transports?page=${page}&size=20`,
+      `/api/v1/transports?page=${page}&size=20${camionId ? `&camionId=${encodeURIComponent(camionId)}` : ""}`,
       "GET",
       undefined,
       signal,
     ),
 
   transport: (id: string, signal?: AbortSignal) =>
-    request<Transport>(
-      `/api/v1/transports/${encodeURIComponent(id)}`,
-      "GET",
-      undefined,
-      signal,
-    ),
+    request<Transport>(`/api/v1/transports/${encodeURIComponent(id)}`, "GET", undefined, signal),
 
   evenementsTransport: (id: string, signal?: AbortSignal) =>
     request<EvenementsPage>(
@@ -257,8 +288,7 @@ export const api = {
       signal,
     ),
 
-  creerBon: (chargementId: string) =>
-    request<Bon>("/api/v1/bons", "POST", { chargementId }),
+  creerBon: (chargementId: string) => request<Bon>("/api/v1/bons", "POST", { chargementId }),
 
   bon: (id: string, signal?: AbortSignal) =>
     request<Bon>(`/api/v1/bons/${encodeURIComponent(id)}`, "GET", undefined, signal),
@@ -269,10 +299,7 @@ export const formatKg = (value: number) =>
 
 export const shortId = (id: string) => id.slice(0, 8).toUpperCase();
 
-export const statusLabel = (status: Statut) =>
-  status === "VALIDE" ? "Validé" : "Brouillon";
+export const statusLabel = (status: Statut) => (status === "VALIDE" ? "Validé" : "Brouillon");
 
 export const errorOf = (error: unknown) =>
-  error instanceof ApiError
-    ? error
-    : new ApiError("Une erreur est survenue. Veuillez réessayer.");
+  error instanceof ApiError ? error : new ApiError("Une erreur est survenue. Veuillez réessayer.");

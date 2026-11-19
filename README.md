@@ -12,8 +12,8 @@ utilisent leurs comptes techniques pour les appels inter-services.
 
 **Intégration des API, sans frontend :** [lancer les tests des quatre services](tests/integration/README.md).
 
-**Interface :** [frontend Transit](frontend/README.md), avec les cinq vues Chargements connectées
-aux API et les autres écrans conservés en maquettes. Sur Windows, démarrer Docker Desktop puis
+**Interface :** [frontend Transit](frontend/README.md), avec les quatre modules connectés
+aux API. Les maquettes d'origine restent consultables séparément. Sur Windows, démarrer Docker Desktop puis
 lancer `.\demarrer-local.ps1` ; ouvrir <http://localhost:5173>.
 
 ## Ma partie
