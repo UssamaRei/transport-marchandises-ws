@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Link, NavLink, Outlet, useNavigate, useOutletContext, useParams } from "react-router-dom";
 import {
   api,
@@ -17,6 +17,9 @@ import {
 import { useAuth } from "./auth";
 import { Badge, Button, Card, Field, Icon, Notice } from "./components/ui";
 import { ErrorBanner, Loading, Modal, useDirtyGuard, useToast } from "./components/live";
+const CitySelect = lazy(() =>
+  import("./components/CitySelect").then((module) => ({ default: module.CitySelect })),
+);
 
 const tabs = [
   { slug: "", label: "Gestion du brouillon", code: "CH01" },
@@ -453,26 +456,47 @@ function InfosEditor({ data, saved }: { data?: Chargement; saved?: (value: Charg
         >
           <div className="form-body">
             <div className="form-grid">
-              {inputs.map((input) => (
-                <Field key={input.name} label={input.label}>
-                  <input
-                    name={input.name}
-                    type={input.name === "destinataireTelephone" ? "tel" : "text"}
-                    maxLength={input.max}
-                    placeholder={input.placeholder}
-                    value={form[input.name]}
-                    disabled={readonly || busy}
-                    onChange={(event) =>
-                      setForm((value) => ({ ...value, [input.name]: event.target.value }))
-                    }
-                    aria-invalid={!!error?.fields[input.name]}
-                    aria-describedby={error?.fields[input.name] ? `error-${input.name}` : undefined}
-                  />
-                  {error?.fields[input.name] && (
-                    <em id={`error-${input.name}`}>{error.fields[input.name]}</em>
-                  )}
-                </Field>
-              ))}
+              {inputs.map((input) =>
+                input.name === "origine" || input.name === "destination" ? (
+                  <Suspense
+                    key={input.name}
+                    fallback={<Loading text="Chargement du sélecteur de villes…" />}
+                  >
+                    <CitySelect
+                      key={input.name}
+                      name={input.name}
+                      label={input.label}
+                      value={form[input.name]}
+                      onChange={(value) =>
+                        setForm((current) => ({ ...current, [input.name]: value }))
+                      }
+                      disabled={readonly || busy}
+                      error={error?.fields[input.name]}
+                    />
+                  </Suspense>
+                ) : (
+                  <Field key={input.name} label={input.label}>
+                    <input
+                      name={input.name}
+                      type={input.name === "destinataireTelephone" ? "tel" : "text"}
+                      maxLength={input.max}
+                      placeholder={input.placeholder}
+                      value={form[input.name]}
+                      disabled={readonly || busy}
+                      onChange={(event) =>
+                        setForm((value) => ({ ...value, [input.name]: event.target.value }))
+                      }
+                      aria-invalid={!!error?.fields[input.name]}
+                      aria-describedby={
+                        error?.fields[input.name] ? `error-${input.name}` : undefined
+                      }
+                    />
+                    {error?.fields[input.name] && (
+                      <em id={`error-${input.name}`}>{error.fields[input.name]}</em>
+                    )}
+                  </Field>
+                ),
+              )}
             </div>
             {data?.statut === "VALIDE" ? (
               <Notice>

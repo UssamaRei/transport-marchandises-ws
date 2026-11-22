@@ -118,7 +118,9 @@ test("parcours complet à travers les quatre modules", async ({ page }) => {
     .click();
   await page.getByRole("link", { name: "Nouveau chargement", exact: true }).click();
   await page.getByLabel("Ville d’origine", { exact: true }).fill("Agadir");
+  await page.getByRole("option", { name: "Agadir Agadir-Ida-Ou-Tanane", exact: true }).click();
   await page.getByLabel("Ville de destination", { exact: true }).fill("Casablanca");
+  await page.getByRole("option", { name: "Casablanca Casablanca", exact: true }).click();
   await page.getByLabel("Nom du destinataire", { exact: true }).fill(identifier);
   await page.getByRole("button", { name: "Enregistrer et continuer", exact: true }).click();
   await expect(
@@ -162,7 +164,9 @@ test("parcours complet à travers les quatre modules", async ({ page }) => {
   const transport = await (await planned).json();
   transportId = transport.id;
   await expect(page).toHaveURL(new RegExp(`/transports/${transportId}$`));
-  await expect(page.getByRole("heading", { name: "Détail du transport.", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Détail du transport.", exact: true }),
+  ).toBeVisible();
   await expect(page.locator("p").filter({ hasText: /^Statut\s*:\s*PLANIFIE$/ })).toBeVisible();
   await shot(page, "04-transport-planifie");
   await page.getByLabel("Date et heure du départ réel", { exact: true }).fill("2026-11-19T10:00");
@@ -178,7 +182,9 @@ test("parcours complet à travers les quatre modules", async ({ page }) => {
     .getByLabel("Date et heure de l'arrivée réelle", { exact: true })
     .fill("2026-11-19T12:00");
   await page.getByRole("button", { name: "Déclarer l'arrivée", exact: true }).click();
-  await expect(page.locator("p").filter({ hasText: /^Statut\s*:\s*CLOTURE_EN_ATTENTE$/ })).toBeVisible();
+  await expect(
+    page.locator("p").filter({ hasText: /^Statut\s*:\s*CLOTURE_EN_ATTENTE$/ }),
+  ).toBeVisible();
   await page.getByLabel("Réceptionnaire", { exact: true }).fill("Client de démonstration");
   await page.getByLabel("Date de réception", { exact: true }).fill("2026-11-19");
   await page.getByLabel("Commentaire", { exact: true }).fill("Livraison complète");

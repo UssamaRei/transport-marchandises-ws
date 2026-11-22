@@ -10,6 +10,20 @@ transports actifs, bons récents et répartition des transports. Les compteurs v
 des API et couvrent toute la base. Chaque module se charge séparément ; utiliser
 **Actualiser** pour relire les données. Les cartes et les listes ouvrent les modules concernés.
 
+Les villes d’origine et de destination utilisent une liste recherchable de
+1 547 communes et centres urbains du Maroc, avec navigation au clavier et recherche
+sans accents. Voir [la source HCP et la mise à jour du catalogue](src/data/SOURCES.md).
+
+## Exemples de démonstration
+
+Avec les quatre backends et Keycloak démarrés, `python scripts/seed-demo.py` depuis
+la racine ajoute 12 camions et 16 chargements fictifs : brouillons, bons émis,
+voyages planifiés, en cours, livrés, à clôturer et annulés. Les destinataires portent
+la mention « démo » et aucun numéro de téléphone réel n’est utilisé.
+Le script utilise les API, conserve les données existantes et reprend son travail
+avec `.tools/demo-data/manifest.json`. Conserver ce fichier pour éviter de recréer
+des exemples. Les identifiants de connexion restent dans `.secrets/auth.env`.
+
 ## Lancer
 
 Le lancement complet demande Java 21, Maven, Node.js 22.12+ et Docker Desktop.
