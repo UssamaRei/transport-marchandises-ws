@@ -1,8 +1,11 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter, Link, Navigate, RouterProvider } from "react-router-dom";
 import { AuthProvider } from "./auth";
+import Dashboard from "./Dashboard";
 import { AuthBoundary, Shell } from "./Shell";
 import { TransportsList, TransportDetail } from "./Transports";
+import { CamionsList, CamionDetail } from "./Camions";
+import { BonDetail, BonsList } from "./Bons";
 import {
   ChargementInfos,
   ChargementsList,
@@ -56,10 +59,15 @@ const router = createBrowserRouter([
       {
         element: <Shell />,
         children: [
-          { index: true, element: <Navigate to="/chargements" replace /> },
+          { index: true, element: <Dashboard /> },
+          { path: "/dashboard", element: <Navigate to="/" replace /> },
           { path: "/chargements", element: <ChargementsList /> },
+          { path: "/camions", element: <CamionsList /> },
+          { path: "/camions/:id", element: <CamionDetail /> },
           { path: "/transports", element: <TransportsList /> },
           { path: "/transports/:id", element: <TransportDetail /> },
+          { path: "/bons", element: <BonsList /> },
+          { path: "/bons/:id", element: <BonDetail /> },
           { path: "/chargements/nouveau", element: <NewChargement /> },
           {
             path: "/chargements/:id",

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import ma.transport.chargements.dto.ChargementRequest;
 import ma.transport.chargements.dto.ChargementResume;
+import ma.transport.chargements.dto.ChargementStatistiques;
 import ma.transport.chargements.dto.LigneChargementRequest;
 import ma.transport.chargements.exception.ChargementException;
 import ma.transport.chargements.model.Camion;
@@ -68,6 +69,11 @@ public class ChargementService {
             result.add(resume);
         }
         return result;
+    }
+
+    @Transactional(readOnly = true)
+    public ChargementStatistiques statistiques() {
+        return chargementRepository.statistiques();
     }
 
     @Transactional

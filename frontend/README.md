@@ -1,8 +1,28 @@
 # Frontend Transit
 
-Design importé des maquettes Figma. Les cinq vues **Chargements** utilisent les vraies API :
-brouillon, marchandises, poids total, validation et consultation. Connexion Keycloak avec PKCE,
-renouvellement du JWT, déconnexion et accès en lecture seule pour LECTEUR.
+Les quatre modules utilisent les API réelles : **Camions**, **Chargements**,
+**Bons de livraison** et **Transports**. Le parcours relie la création d'un camion,
+la préparation des marchandises, l'émission du bon, le voyage et sa réception.
+Connexion Keycloak avec PKCE, renouvellement du JWT et accès en lecture seule pour LECTEUR.
+
+L’accueil `/` affiche le **tableau de bord** : disponibilité des camions, brouillons,
+transports actifs, bons récents et répartition des transports. Les compteurs viennent
+des API et couvrent toute la base. Chaque module se charge séparément ; utiliser
+**Actualiser** pour relire les données. Les cartes et les listes ouvrent les modules concernés.
+
+Les villes d’origine et de destination utilisent une liste recherchable de
+1 547 communes et centres urbains du Maroc, avec navigation au clavier et recherche
+sans accents. Voir [la source HCP et la mise à jour du catalogue](src/data/SOURCES.md).
+
+## Exemples de démonstration
+
+Avec les quatre backends et Keycloak démarrés, `python scripts/seed-demo.py` depuis
+la racine ajoute 12 camions et 16 chargements fictifs : brouillons, bons émis,
+voyages planifiés, en cours, livrés, à clôturer et annulés. Les destinataires portent
+la mention « démo » et aucun numéro de téléphone réel n’est utilisé.
+Le script utilise les API, conserve les données existantes et reprend son travail
+avec `.tools/demo-data/manifest.json`. Conserver ce fichier pour éviter de recréer
+des exemples. Les identifiants de connexion restent dans `.secrets/auth.env`.
 
 ## Lancer
 
@@ -14,16 +34,16 @@ Sur ce PC, depuis la racine du dépôt, ouvrir Docker Desktop puis exécuter :
 .\demarrer-local.ps1
 ```
 
-Le script construit les deux backends, lance Camions, Chargements et Keycloak, puis le frontend.
-Il utilise les fichiers privés `camions_app.env` et `chargements_app.env` du dossier
+Le script construit les quatre backends, lance les applications et Keycloak, puis le frontend.
+Il utilise les fichiers privés `camions_app.env`, `chargements_app.env`, `bons_app.env`
+et `transports_app.env` du dossier
 `Desktop/Neon-WS-Credentials`. Un autre dossier peut être fourni avec `-CredentialsDirectory`.
 Ces backends utilisent la vraie base commune ; les données saisies dans l'interface y sont enregistrées.
 Ctrl+C arrête Vite ; les backends restent dans Docker Desktop.
 
 ### Frontend seul
 
-Prérequis : Node.js 22.12+ et npm. Démarrer d'abord Keycloak et les backends
-[Chargements](../services/chargements/README.md) et [Camions](../services/flotte/README.md).
+Prérequis : Node.js 22.12+ et npm. Démarrer d'abord Keycloak et les quatre backends.
 
 ```powershell
 cd frontend
@@ -35,12 +55,13 @@ Ouvrir <http://localhost:5173>. Le bouton **Se connecter** ouvre la page Keycloa
 Les comptes de développement sont décrits dans [auth/README.md](../auth/README.md).
 Ne jamais mettre de mot de passe ou de secret de compte technique dans le frontend.
 
-Par défaut : API Chargements `8082`, Camions `8081`, Keycloak `8090`.
-Les routes `/api/v1/chargements` et `/api/v1/camions` passent par le proxy Vite en développement.
+Par défaut : API Camions `8081`, Chargements `8082`, Bons `8083`, Transports `8084`, Keycloak `8090`.
+Les routes `/api/v1/chargements`, `/api/v1/camions`, `/api/v1/bons` et `/api/v1/transports`
+passent par le proxy Vite en développement.
 Copier `.env.example` vers `.env.local` uniquement pour changer les adresses.
 Les redirections Keycloak doivent autoriser l'adresse du frontend, y compris la déconnexion.
 
-Les autres écrans Figma sont conservés à **`/maquettes`**, avec une bannière indiquant qu'ils
+Les écrans Figma d'origine sont conservés à **`/maquettes`**, avec une bannière indiquant qu'ils
 utilisent des données de démonstration. Ils ne modifient pas la base et ne prouvent pas
 qu'un backend est implémenté. La recherche de chargements filtre la page affichée.
 
@@ -51,6 +72,23 @@ npm run typecheck
 npm run build
 ```
 
+Pour vérifier le parcours complet dans Chrome avec une base jetable, depuis la racine :
+
+```powershell
+python tests/integration/run_frontend.py
+```
+
+Fermer le frontend déjà ouvert sur le port 5173 avant cette commande. Elle lance les
+tests des backends, le frontend et les tests navigateur, puis supprime la pile de test.
+Chrome doit être installé ; `E2E_CHROME_PATH` permet de préciser son exécutable.
+Les captures et résultats sont enregistrés dans `.tools/frontend-systeme/`.
+
+Pour vérifier uniquement le tableau de bord sur les services démarrés :
+`npm run test:e2e -- tests/dashboard.spec.ts` depuis `frontend`.
+Ces tests ne font aucune écriture métier. Les scénarios de panne, de liste vide et
+de données remplies utilisent des réponses locales au navigateur. Les captures
+sont dans `.tools/dashboard-qa/`.
+
 Le résultat est dans `dist/`. En hébergement, servir `index.html` pour les routes de navigation
-et acheminer `/api/v1/chargements` et `/api/v1/camions` vers leurs backends respectifs,
+et acheminer `/api/v1/chargements`, `/api/v1/camions`, `/api/v1/bons` et `/api/v1/transports` vers leurs backends,
 ou définir `VITE_API_BASE_URL` et configurer CORS côté backends. Le proxy Vite n'est pas un serveur de production.

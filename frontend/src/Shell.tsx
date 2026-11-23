@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { login, logout, useAuth } from "./auth";
-import { Button, Icon, type IconName } from "./components/ui";
+import { Button, Icon } from "./components/ui";
 import { Loading, ToastProvider } from "./components/live";
 
 export function AuthBoundary() {
@@ -27,8 +28,8 @@ export function AuthBoundary() {
           <br />à chaque étape<span className="title-dot">.</span>
         </h1>
         <p>
-          Retrouvez vos chargements, préparez vos marchandises et validez leur transport dans un
-          même espace.
+          Gérez vos camions, préparez les marchandises et suivez chaque livraison dans un même
+          espace.
         </p>
         {auth.error ? (
           <>
@@ -72,7 +73,40 @@ export function AuthBoundary() {
 export function Shell() {
   const auth = useAuth();
   const location = useLocation();
+  const isDashboard = location.pathname === "/";
   const isDetail = /^\/chargements\/[^/]+/.test(location.pathname);
+  const isBonRoute = location.pathname.startsWith("/bons");
+  const isTransportRoute = location.pathname.startsWith("/transports");
+  const isCamionRoute = location.pathname.startsWith("/camions");
+  const sectionPath = isDashboard
+    ? "/"
+    : isBonRoute
+      ? "/bons"
+      : isTransportRoute
+        ? "/transports"
+        : isCamionRoute
+          ? "/camions"
+          : "/chargements";
+  const sectionLabel = isDashboard
+    ? "Tableau de bord"
+    : isBonRoute
+      ? "Bons de livraison"
+      : isTransportRoute
+        ? "Suivi des transports"
+        : isCamionRoute
+          ? "Camions"
+          : "Chargements";
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    const id =
+      isBonRoute && query.has("chargementId")
+        ? "emettre-bon"
+        : isTransportRoute && query.has("bonId")
+          ? "planifier-transport"
+          : "";
+    if (id) document.getElementById(id)?.scrollIntoView({ block: "start" });
+    else window.scrollTo(0, 0);
+  }, [location.pathname, location.search, isBonRoute, isTransportRoute]);
   return (
     <ToastProvider>
       <div className="app-shell live-app">
@@ -80,7 +114,7 @@ export function Shell() {
           Aller au contenu
         </a>
         <aside className="sidebar">
-          <Link className="brand" to="/chargements" aria-label="Transit, accueil">
+          <Link className="brand" to="/" aria-label="Transit, accueil">
             <span className="logo-mark">
               <Icon name="route" size={25} />
             </span>
@@ -95,6 +129,14 @@ export function Shell() {
           </div>
           <div className="nav-label">VOS MODULES</div>
           <nav aria-label="Navigation principale">
+            <NavLink
+              end
+              to="/"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              <Icon name="grid" />
+              <span>Tableau de bord</span>
+            </NavLink>
             <NavLink
               className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
               to="/chargements"
@@ -122,18 +164,21 @@ export function Shell() {
               )}
             </div>
 
-            {(
-              [
-                { name: "Camions", icon: "truck" },
-                { name: "Bons de livraison", icon: "file" },
-              ] as { name: string; icon: IconName }[]
-            ).map((item) => (
-              <div className="nav-item live-nav-pending" key={item.name}>
-                <Icon name={item.icon} />
-                <span>{item.name}</span>
-                <small>Maquette</small>
-              </div>
-            ))}
+            <NavLink
+              to="/camions"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              <Icon name="truck" />
+              <span>Camions</span>
+            </NavLink>
+
+            <NavLink
+              to="/bons"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              <Icon name="file" />
+              <span>Bons de livraison</span>
+            </NavLink>
 
             <NavLink
               to="/transports"
@@ -149,7 +194,7 @@ export function Shell() {
                 <Icon name="layers" />
               </span>
               <h3>Le projet en images.</h3>
-              <p>Les autres modules sont disponibles dans les maquettes.</p>
+              <p>Les maquettes donnent un aperçu des autres écrans du projet.</p>
               <Link to="/maquettes">
                 Voir les 25 écrans <Icon name="arrow" size={15} />
               </Link>
@@ -177,10 +222,10 @@ export function Shell() {
             <div className="breadcrumbs">
               <span>Espace de gestion</span>
               <Icon name="chevron" size={12} />
-              <Link to="/chargements">
-                <strong>Chargements</strong>
+              <Link to={sectionPath}>
+                <strong>{sectionLabel}</strong>
               </Link>
-              {isDetail && (
+              {(isDetail || location.pathname !== sectionPath) && (
                 <>
                   <Icon name="chevron" size={12} />
                   <span className="breadcrumb-id">
@@ -213,14 +258,14 @@ export function Shell() {
                 <Icon name="alert" size={32} />
                 <h1>Accès non attribué</h1>
                 <p>
-                  Votre compte est connecté, mais aucun rôle ne vous permet de consulter les
-                  chargements. Contactez le responsable de l’équipe.
+                  Votre compte est connecté, mais aucun rôle ne vous permet de consulter les les
+                  données. Contactez le responsable de l’équipe.
                 </p>
               </div>
             )}
             <footer className="main-footer">
               <span>© {new Date().getFullYear()} Transit. La logistique, simplement.</span>
-              <span>Gestion des chargements</span>
+              <span>Transport de marchandises</span>
             </footer>
           </main>
         </div>

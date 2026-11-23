@@ -54,6 +54,7 @@ Préfixe : `/api/v1/chargements`. Corps et réponses en JSON.
 |---|---|
 | `POST` sur le préfixe | Créer un brouillon (`201`, en-tête `Location`) |
 | `GET` sur le préfixe avec `?limit=20&offset=0` | Lister les résumés, sans lignes (maximum 100 par page) |
+| `GET /statistiques` | Totaux de toute la base : `total`, `brouillons`, `valides`, pour le tableau de bord |
 | `GET /{id}` | Lire le détail complet, notamment pour Bons de livraison |
 | `PUT /{id}` | Remplacer les informations du brouillon |
 | `DELETE /{id}` | Supprimer le brouillon et ses lignes (`204`) |

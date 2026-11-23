@@ -1,0 +1,109 @@
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: transport_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${TEST_DB_PASSWORD:?}
+    ports:
+      - "127.0.0.1:15432:5432"
+    volumes:
+      - ../../database/V1__initial_schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ../../database/V2__transport_preuve_reprise.sql:/docker-entrypoint-initdb.d/02-reprise.sql:ro
+      - ./roles.sql:/docker-entrypoint-initdb.d/03-roles.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d transport_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.2
+    command: ["start-dev", "--import-realm", "--http-port=8090"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?}
+      KC_HOSTNAME: http://localhost:18090
+      CHARGEMENTS_CLIENT_SECRET: ${CHARGEMENTS_CLIENT_SECRET:?}
+      CAMIONS_CLIENT_SECRET: ${CAMIONS_CLIENT_SECRET:?}
+      BONS_CLIENT_SECRET: ${BONS_CLIENT_SECRET:?}
+      TRANSPORTS_CLIENT_SECRET: ${TRANSPORTS_CLIENT_SECRET:?}
+      WS_ADMIN_PASSWORD: ${WS_ADMIN_PASSWORD:?}
+      WS_AGENT_PASSWORD: ${WS_AGENT_PASSWORD:?}
+      WS_LECTEUR_PASSWORD: ${WS_LECTEUR_PASSWORD:?}
+    ports:
+      - "127.0.0.1:18090:8090"
+    volumes:
+      - ../../auth/transport-ws-realm.json:/opt/keycloak/data/import/transport-ws-realm.json:ro
+      - ../../auth/themes/transit:/opt/keycloak/themes/transit:ro
+  camions:
+    image: eclipse-temurin:21-jre
+    entrypoint: ["java", "-jar", "/app/app.jar"]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/transport_test
+      SPRING_DATASOURCE_USERNAME: camions_app
+      SPRING_DATASOURCE_PASSWORD: ${TEST_DB_PASSWORD:?}
+      AUTH_ISSUER_URI: http://localhost:18090/realms/transport-ws
+      AUTH_JWK_SET_URI: http://keycloak:8090/realms/transport-ws/protocol/openid-connect/certs
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
+    ports:
+      - "127.0.0.1:18081:8081"
+    volumes:
+      - ../../services/flotte/target/flotte-0.1.0-SNAPSHOT.jar:/app/app.jar:ro
+    depends_on:
+      db: {condition: service_healthy}
+  chargements:
+    image: eclipse-temurin:21-jre
+    entrypoint: ["java", "-jar", "/app/app.jar"]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/transport_test
+      SPRING_DATASOURCE_USERNAME: chargements_app
+      SPRING_DATASOURCE_PASSWORD: ${TEST_DB_PASSWORD:?}
+      CAMIONS_SERVICE_URL: http://camions:8081
+      CHARGEMENTS_CLIENT_SECRET: ${CHARGEMENTS_CLIENT_SECRET:?}
+      AUTH_ISSUER_URI: http://localhost:18090/realms/transport-ws
+      AUTH_JWK_SET_URI: http://keycloak:8090/realms/transport-ws/protocol/openid-connect/certs
+      AUTH_TOKEN_URI: http://keycloak:8090/realms/transport-ws/protocol/openid-connect/token
+    ports:
+      - "127.0.0.1:18082:8082"
+    volumes:
+      - ../../services/chargements/target/chargements-0.0.1-SNAPSHOT.jar:/app/app.jar:ro
+    depends_on:
+      db: {condition: service_healthy}
+  bons:
+    image: eclipse-temurin:21-jre
+    entrypoint: ["java", "-jar", "/app/app.jar"]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/transport_test
+      SPRING_DATASOURCE_USERNAME: bons_app
+      SPRING_DATASOURCE_PASSWORD: ${TEST_DB_PASSWORD:?}
+      CHARGEMENTS_BASE_URL: http://chargements:8082
+      BONS_CLIENT_SECRET: ${BONS_CLIENT_SECRET:?}
+      AUTH_ISSUER_URI: http://localhost:18090/realms/transport-ws
+      AUTH_JWK_SET_URI: http://keycloak:8090/realms/transport-ws/protocol/openid-connect/certs
+      AUTH_TOKEN_URI: http://keycloak:8090/realms/transport-ws/protocol/openid-connect/token
+    ports:
+      - "127.0.0.1:18083:8083"
+    volumes:
+      - ../../services/bons/target/bons-0.0.1-SNAPSHOT.jar:/app/app.jar:ro
+    depends_on:
+      db: {condition: service_healthy}
+  transports:
+    image: eclipse-temurin:21-jre
+    entrypoint: ["java", "-jar", "/app/app.jar"]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/transport_test
+      SPRING_DATASOURCE_USERNAME: transports_app
+      SPRING_DATASOURCE_PASSWORD: ${TEST_DB_PASSWORD:?}
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
+      BONS_BASE_URL: http://bons:8083
+      CAMIONS_BASE_URL: http://camions:8081
+      TRANSPORTS_CLIENT_SECRET: ${TRANSPORTS_CLIENT_SECRET:?}
+      AUTH_ISSUER_URI: http://localhost:18090/realms/transport-ws
+      AUTH_JWK_SET_URI: http://keycloak:8090/realms/transport-ws/protocol/openid-connect/certs
+      AUTH_TOKEN_URI: http://keycloak:8090/realms/transport-ws/protocol/openid-connect/token
+    ports:
+      - "127.0.0.1:18084:8084"
+    volumes:
+      - ../../services/transports/target/transports-0.0.1-SNAPSHOT.jar:/app/app.jar:ro
+    depends_on:
+      db: {condition: service_healthy}

@@ -3,6 +3,7 @@ package ma.transport.chargements.repository;
 import java.util.List;
 import java.util.Optional;
 import ma.transport.chargements.model.Chargement;
+import ma.transport.chargements.dto.ChargementStatistiques;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -44,6 +45,17 @@ public class ChargementRepository {
     public List<Chargement> findAll(int limit, int offset) {
         String sql = "SELECT " + COLUMNS + " FROM chargement ORDER BY created_at DESC, id LIMIT ? OFFSET ?";
         return jdbc.query(sql, new ChargementRowMapper(), limit, offset);
+    }
+
+    public ChargementStatistiques statistiques() {
+        String sql = """
+                SELECT COUNT(*) AS total,
+                       COUNT(CASE WHEN statut = 'BROUILLON' THEN 1 END) AS brouillons,
+                       COUNT(CASE WHEN statut = 'VALIDE' THEN 1 END) AS valides
+                FROM chargement
+                """;
+        return jdbc.queryForObject(sql, (result, row) -> new ChargementStatistiques(
+                result.getLong("total"), result.getLong("brouillons"), result.getLong("valides")));
     }
 
     public void update(Chargement chargement) {

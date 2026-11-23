@@ -8,4 +8,7 @@ public record PlanificationRequest(
         OffsetDateTime departPrevu,
         String operationKey
 ) {
+    public PlanificationRequest {
+        departPrevu = Dates.normaliser(departPrevu);
+    }
 }

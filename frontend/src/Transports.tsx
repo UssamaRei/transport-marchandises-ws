@@ -1,13 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 
-import {
-  api,
-  errorOf,
-  type EvenementsPage,
-  type Transport,
-  type TransportsPage,
-} from "./api";
+import { api, errorOf, type EvenementsPage, type Transport, type TransportsPage } from "./api";
 
 import { Button, Card } from "./components/ui";
 import { Loading } from "./components/live";
@@ -18,17 +12,23 @@ function formatDate(value: string | null) {
 
   const date = new Date(value);
 
-  return Number.isNaN(date.getTime())
-    ? value
-    : date.toLocaleString("fr-FR");
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString("fr-FR");
 }
 
 export function TransportsList() {
+  const [params] = useSearchParams();
+  const camionId = params.get("camionId") || "";
+  const statut = params.get("statut") || "";
+  const actifs = params.get("actifs") === "true";
   const [page, setPage] = useState(0);
   const [data, setData] = useState<TransportsPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [version, setVersion] = useState(0);
+
+  useEffect(() => {
+    setPage(0);
+  }, [camionId, statut, actifs]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -38,7 +38,7 @@ export function TransportsList() {
     setData(null);
 
     api
-      .transports(page, controller.signal)
+      .transports(page, controller.signal, camionId, statut, actifs)
       .then(setData)
       .catch((err: unknown) => {
         if (!controller.signal.aborted) {
@@ -52,7 +52,7 @@ export function TransportsList() {
       });
 
     return () => controller.abort();
-  }, [page, version]);
+  }, [page, version, camionId, statut, actifs]);
 
   return (
     <>
@@ -63,20 +63,29 @@ export function TransportsList() {
             Transports<span className="title-dot">.</span>
           </h1>
           <p>Consultez et planifiez vos transports.</p>
+          {(camionId || statut || actifs) && (
+            <p>
+              {camionId
+                ? "Camion sélectionné"
+                : statut
+                  ? `Statut : ${statut}`
+                  : "Transports actifs"}{" "}
+              · <Link to="/transports">Voir tous les transports</Link>
+            </p>
+          )}
         </div>
       </div>
 
-      <Card title="Tous les transports">
+      <Card
+        title={camionId || statut || actifs ? "Transports sélectionnés" : "Tous les transports"}
+      >
         {loading && <Loading />}
 
         {error && (
           <div className="live-error" role="alert">
             <p>{error}</p>
 
-            <Button
-              secondary
-              onClick={() => setVersion((v) => v + 1)}
-            >
+            <Button secondary onClick={() => setVersion((v) => v + 1)}>
               Réessayer
             </Button>
           </div>
@@ -105,11 +114,7 @@ export function TransportsList() {
                     {data.content.map((transport) => (
                       <tr key={transport.id}>
                         <td>
-                          <Link
-                            to={`/transports/${encodeURIComponent(
-                              transport.id
-                            )}`}
-                          >
+                          <Link to={`/transports/${encodeURIComponent(transport.id)}`}>
                             {transport.id}
                           </Link>
                         </td>
@@ -128,11 +133,7 @@ export function TransportsList() {
             <div className="table-footer">
               <span>{data.totalElements} transport(s) au total</span>
 
-              <Button
-                secondary
-                disabled={page === 0}
-                onClick={() => setPage((p) => p - 1)}
-              >
+              <Button secondary disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
                 Précédent
               </Button>
 
@@ -213,10 +214,7 @@ export function TransportDetail() {
         {error && (
           <p className="live-error" role="alert">
             {error}{" "}
-            <Button
-              secondary
-              onClick={() => setVersion((v) => v + 1)}
-            >
+            <Button secondary onClick={() => setVersion((v) => v + 1)}>
               Réessayer
             </Button>
           </p>
@@ -228,24 +226,25 @@ export function TransportDetail() {
               <strong>ID :</strong> {transport.id}
             </p>
             <p>
-              <strong>Bon ID :</strong> {transport.bonId || "—"}
+              <strong>Bon de livraison :</strong>{" "}
+              <Link className="inline-link" to={`/bons/${transport.bonId}`}>
+                Consulter le bon
+              </Link>
             </p>
             <p>
-              <strong>Camion ID :</strong> {transport.camionId || "—"}
+              <strong>Camion :</strong>{" "}
+              <Link className="inline-link" to={`/camions/${transport.camionId}`}>
+                Consulter le camion
+              </Link>
             </p>
             <p>
-              <strong>Destination :</strong>{" "}
-              {transport.destination || "—"}
+              <strong>Destination :</strong> {transport.destination || "—"}
             </p>
             <p>
-              <strong>Poids :</strong>{" "}
-              {transport.poidsKg == null
-                ? "—"
-                : `${transport.poidsKg} kg`}
+              <strong>Poids :</strong> {transport.poidsKg == null ? "—" : `${transport.poidsKg} kg`}
             </p>
             <p>
-              <strong>Départ prévu :</strong>{" "}
-              {formatDate(transport.departPrevu)}
+              <strong>Départ prévu :</strong> {formatDate(transport.departPrevu)}
             </p>
             <p>
               <strong>Statut :</strong> {transport.statut}
@@ -254,30 +253,23 @@ export function TransportDetail() {
         )}
       </Card>
 
-      {transport && !loading && !error && (
+      {transport && !error && (
         <>
           <ActionsTransport
+            key={transport.id}
             transport={transport}
+            refreshing={loading}
             onChanged={() => setVersion((v) => v + 1)}
           />
 
-          <TransportEvenements
-            id={transport.id}
-            version={version}
-          />
+          <TransportEvenements id={transport.id} version={version} />
         </>
       )}
     </>
   );
 }
 
-function TransportEvenements({
-  id,
-  version,
-}: {
-  id: string;
-  version: number;
-}) {
+function TransportEvenements({ id, version }: { id: string; version: number }) {
   const [data, setData] = useState<EvenementsPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -327,17 +319,13 @@ function TransportEvenements({
                   <strong>{evenement.type}</strong>
                   {" — "}
                   {formatDate(evenement.dateEvenement)}
-                  {evenement.description &&
-                    ` — ${evenement.description}`}
+                  {evenement.description && ` — ${evenement.description}`}
                 </li>
               ))}
             </ul>
           )}
 
-          <p>
-            {data.totalElements} événement(s) au total —
-            20 premiers affichés.
-          </p>
+          <p>{data.totalElements} événement(s) au total — 20 premiers affichés.</p>
         </div>
       )}
     </Card>

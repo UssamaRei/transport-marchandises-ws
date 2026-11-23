@@ -5,4 +5,7 @@ import java.time.OffsetDateTime;
 public record ArriveeRequest(
         OffsetDateTime arriveeReelle
 ) {
+    public ArriveeRequest {
+        arriveeReelle = Dates.normaliser(arriveeReelle);
+    }
 }

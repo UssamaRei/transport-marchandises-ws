@@ -6,6 +6,8 @@ services:
     env_file:
       - ${WS_CAMIONS_ENV_FILE:?Lancer demarrer-local.ps1 avec les fichiers prives}
     environment:
+      SERVER_PORT: 8081
+      AUTH_ISSUER_URI: ${AUTH_BASE_URL:-http://localhost:8090}/realms/transport-ws
       AUTH_JWK_SET_URI: http://keycloak:8090/realms/transport-ws/protocol/openid-connect/certs
       SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
       SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 0
@@ -20,9 +22,47 @@ services:
       - ${WS_CHARGEMENTS_ENV_FILE:?Lancer demarrer-local.ps1 avec les fichiers prives}
     environment:
       CAMIONS_SERVICE_URL: http://camions:8081
+      SERVER_PORT: 8082
+      AUTH_ISSUER_URI: ${AUTH_BASE_URL:-http://localhost:8090}/realms/transport-ws
+      CHARGEMENTS_CLIENT_SECRET: ${CHARGEMENTS_CLIENT_SECRET:?Secret manquant}
       AUTH_JWK_SET_URI: http://keycloak:8090/realms/transport-ws/protocol/openid-connect/certs
       AUTH_TOKEN_URI: http://keycloak:8090/realms/transport-ws/protocol/openid-connect/token
     volumes:
       - ./services/chargements/target/chargements-0.0.1-SNAPSHOT.jar:/app/app.jar:ro
     ports:
       - "127.0.0.1:8082:8082"
+  bons:
+    image: eclipse-temurin:21-jre
+    entrypoint: ["java", "-jar", "/app/app.jar"]
+    env_file:
+      - ${WS_BONS_ENV_FILE:?Lancer demarrer-local.ps1 avec les fichiers prives}
+    environment:
+      CHARGEMENTS_BASE_URL: http://chargements:8082
+      SERVER_PORT: 8083
+      AUTH_ISSUER_URI: ${AUTH_BASE_URL:-http://localhost:8090}/realms/transport-ws
+      BONS_CLIENT_SECRET: ${BONS_CLIENT_SECRET:?Secret manquant}
+      AUTH_JWK_SET_URI: http://keycloak:8090/realms/transport-ws/protocol/openid-connect/certs
+      AUTH_TOKEN_URI: http://keycloak:8090/realms/transport-ws/protocol/openid-connect/token
+    volumes:
+      - ./services/bons/target/bons-0.0.1-SNAPSHOT.jar:/app/app.jar:ro
+    ports:
+      - "127.0.0.1:8083:8083"
+  transports:
+    image: eclipse-temurin:21-jre
+    entrypoint: ["java", "-jar", "/app/app.jar"]
+    env_file:
+      - ${WS_TRANSPORTS_ENV_FILE:?Lancer demarrer-local.ps1 avec les fichiers prives}
+    environment:
+      BONS_BASE_URL: http://bons:8083
+      SERVER_PORT: 8084
+      AUTH_ISSUER_URI: ${AUTH_BASE_URL:-http://localhost:8090}/realms/transport-ws
+      CAMIONS_BASE_URL: http://camions:8081
+      TRANSPORTS_CLIENT_SECRET: ${TRANSPORTS_CLIENT_SECRET:?Secret manquant}
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 0
+      AUTH_JWK_SET_URI: http://keycloak:8090/realms/transport-ws/protocol/openid-connect/certs
+      AUTH_TOKEN_URI: http://keycloak:8090/realms/transport-ws/protocol/openid-connect/token
+    volumes:
+      - ./services/transports/target/transports-0.0.1-SNAPSHOT.jar:/app/app.jar:ro
+    ports:
+      - "127.0.0.1:8084:8084"

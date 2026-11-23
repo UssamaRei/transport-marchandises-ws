@@ -1,0 +1,121 @@
+.city-field {
+  min-width: 0;
+}
+.city-label {
+  color: #5e7381;
+  font-size: 14px;
+  font-weight: 500;
+}
+.city-control {
+  position: relative;
+}
+.city-field .city-control input {
+  padding-left: 39px;
+  padding-right: 39px;
+}
+.city-pin {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #82999d;
+}
+.city-toggle {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  bottom: 4px;
+  width: 31px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 5px;
+  color: #6b8186;
+  background: transparent;
+}
+.city-toggle:hover {
+  color: #12988c;
+  background: #edf6f4;
+}
+.city-toggle svg {
+  transform: rotate(90deg);
+}
+.city-toggle[data-open] svg {
+  transform: rotate(-90deg);
+}
+.city-options {
+  width: var(--input-width);
+  max-height: min(310px, var(--anchor-max-height));
+  padding: 6px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  border: 1px solid #dce6e6;
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 12px 32px #1538491a;
+  z-index: 70;
+  outline: none;
+}
+.city-options-empty {
+  display: none;
+}
+.city-option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 11px;
+  min-height: 56px;
+  border-radius: 6px;
+  color: #34485a;
+  cursor: pointer;
+  user-select: none;
+  font-family: "DM Sans", sans-serif;
+}
+.city-option[data-focus] {
+  background: #edf6f4;
+  color: #137f74;
+}
+.city-option[data-selected] {
+  color: #137f74;
+  font-weight: 600;
+}
+.city-option-pin {
+  color: #91a6a9;
+  flex-shrink: 0;
+}
+.city-option-text {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+.city-option strong {
+  font-size: 13px;
+  font-weight: 550;
+}
+.city-option small {
+  font-size: 11px;
+  color: #85979e;
+}
+.city-description button {
+  color: #0c8076;
+  text-decoration: underline;
+}
+.city-field input[aria-invalid="true"] {
+  border-color: #bf6f60;
+}
+.city-field[data-disabled] .city-toggle {
+  display: none;
+}
+.city-field[data-disabled] .city-description {
+  display: none;
+}
+@media (max-width: 540px) {
+  .city-option {
+    min-height: 60px;
+  }
+}
