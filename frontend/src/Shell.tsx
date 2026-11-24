@@ -132,6 +132,7 @@ export function Shell() {
             <NavLink
               end
               to="/"
+              aria-label="Tableau de bord"
               className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
             >
               <Icon name="grid" />
@@ -140,6 +141,7 @@ export function Shell() {
             <NavLink
               className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
               to="/chargements"
+              aria-label="Chargements"
             >
               <Icon name="box" />
               <span>Chargements</span>
@@ -166,6 +168,7 @@ export function Shell() {
 
             <NavLink
               to="/camions"
+              aria-label="Camions"
               className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
             >
               <Icon name="truck" />
@@ -174,6 +177,7 @@ export function Shell() {
 
             <NavLink
               to="/bons"
+              aria-label="Bons de livraison"
               className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
             >
               <Icon name="file" />
@@ -182,6 +186,7 @@ export function Shell() {
 
             <NavLink
               to="/transports"
+              aria-label="Suivi des transports"
               className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
             >
               <Icon name="route" />

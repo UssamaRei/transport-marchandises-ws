@@ -16,7 +16,6 @@ import ma.transport.flotte.model.ReservationCamion;
 import ma.transport.flotte.model.StatutReservation;
 import ma.transport.flotte.repository.CamionRepository;
 import ma.transport.flotte.repository.ReservationCamionRepository;
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;

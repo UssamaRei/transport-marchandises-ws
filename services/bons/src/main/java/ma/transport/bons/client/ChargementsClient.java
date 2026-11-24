@@ -19,10 +19,14 @@ public class ChargementsClient {
         try {
             ChargementDetails detail = restClient.get().uri("/api/v1/chargements/{id}", id)
                     .retrieve().body(ChargementDetails.class);
-            if (detail == null) throw new BonException(HttpStatus.BAD_GATEWAY, "Réponse vide du service Chargements.");
+            if (detail == null) {
+                throw new BonException(HttpStatus.BAD_GATEWAY, "Réponse vide du service Chargements.");
+            }
             return detail;
         } catch (RestClientResponseException error) {
-            if (error.getStatusCode().value() == 404) throw new BonException(HttpStatus.NOT_FOUND, "Chargement introuvable.");
+            if (error.getStatusCode().value() == 404) {
+                throw new BonException(HttpStatus.NOT_FOUND, "Chargement introuvable.");
+            }
             throw new BonException(HttpStatus.BAD_GATEWAY, "Le service Chargements a retourné une erreur.");
         } catch (ResourceAccessException error) {
             throw new BonException(HttpStatus.SERVICE_UNAVAILABLE, "Le service Chargements est inaccessible.");

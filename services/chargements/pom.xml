@@ -16,6 +16,11 @@
   <properties>
     <java.version>21</java.version>
     <spring-cloud.version>2025.0.3</spring-cloud.version>
+    <postgresql.version>42.7.14</postgresql.version>
+    <tomcat.version>10.1.62</tomcat.version>
+    <jackson-bom.version>2.21.8</jackson-bom.version>
+    <logback.version>1.5.38</logback.version>
+    <commons-lang3.version>3.18.0</commons-lang3.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -87,4 +92,67 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>qualite</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-checkstyle-plugin</artifactId>
+            <version>3.6.0</version>
+            <dependencies>
+              <dependency>
+                <groupId>com.puppycrawl.tools</groupId>
+                <artifactId>checkstyle</artifactId>
+                <version>10.26.1</version>
+              </dependency>
+            </dependencies>
+            <configuration>
+              <configLocation>${project.basedir}/../../quality/checkstyle.xml</configLocation>
+              <includeTestSourceDirectory>false</includeTestSourceDirectory>
+              <excludeGeneratedSources>true</excludeGeneratedSources>
+              <includeResources>false</includeResources>
+              <includeTestResources>false</includeTestResources>
+              <consoleOutput>true</consoleOutput>
+              <failOnViolation>true</failOnViolation>
+              <linkXRef>false</linkXRef>
+            </configuration>
+            <executions>
+              <execution>
+                <id>controle-style</id>
+                <phase>validate</phase>
+                <goals><goal>check</goal></goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>0.8.16</version>
+            <configuration><append>false</append></configuration>
+            <executions>
+              <execution>
+                <id>mesurer-couverture</id>
+                <goals><goal>prepare-agent</goal></goals>
+              </execution>
+              <execution>
+                <id>rapport-couverture</id>
+                <phase>test</phase>
+                <goals><goal>report</goal></goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-report-plugin</artifactId>
+            <version>3.5.6</version>
+            <configuration><linkXRef>false</linkXRef></configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

@@ -1,6 +1,15 @@
 package ma.transport.bons.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -50,21 +59,38 @@ public class BonLivraison {
     @OrderBy("id ASC")
     private List<LigneBon> lignes = new ArrayList<>();
 
-    public void addLigne(LigneBon ligne) { lignes.add(ligne); ligne.setBon(this); }
-    public String getId() { return id; } public void setId(String v) { id = v; }
-    public String getNumero() { return numero; } public void setNumero(String v) { numero = v; }
-    public String getChargementId() { return chargementId; } public void setChargementId(String v) { chargementId = v; }
-    public String getCamionSouhaiteId() { return camionSouhaiteId; } public void setCamionSouhaiteId(String v) { camionSouhaiteId = v; }
-    public String getOrigine() { return origine; } public void setOrigine(String v) { origine = v; }
-    public String getDestination() { return destination; } public void setDestination(String v) { destination = v; }
-    public String getDestinataireNom() { return destinataireNom; } public void setDestinataireNom(String v) { destinataireNom = v; }
-    public String getDestinataireTelephone() { return destinataireTelephone; } public void setDestinataireTelephone(String v) { destinataireTelephone = v; }
-    public BigDecimal getPoidsTotalKg() { return poidsTotalKg; } public void setPoidsTotalKg(BigDecimal v) { poidsTotalKg = v; }
-    public StatutBon getStatut() { return statut; } public void setStatut(StatutBon v) { statut = v; }
-    public String getTransportPreuveId() { return transportPreuveId; } public void setTransportPreuveId(String v) { transportPreuveId = v; }
-    public String getRecepteur() { return recepteur; } public void setRecepteur(String v) { recepteur = v; }
-    public OffsetDateTime getLivreLe() { return livreLe; } public void setLivreLe(OffsetDateTime v) { livreLe = v; }
-    public String getCommentaire() { return commentaire; } public void setCommentaire(String v) { commentaire = v; }
+    public void addLigne(LigneBon ligne) {
+        lignes.add(ligne);
+        ligne.setBon(this);
+    }
+    public String getId() { return id; }
+    public void setId(String v) { id = v; }
+    public String getNumero() { return numero; }
+    public void setNumero(String v) { numero = v; }
+    public String getChargementId() { return chargementId; }
+    public void setChargementId(String v) { chargementId = v; }
+    public String getCamionSouhaiteId() { return camionSouhaiteId; }
+    public void setCamionSouhaiteId(String v) { camionSouhaiteId = v; }
+    public String getOrigine() { return origine; }
+    public void setOrigine(String v) { origine = v; }
+    public String getDestination() { return destination; }
+    public void setDestination(String v) { destination = v; }
+    public String getDestinataireNom() { return destinataireNom; }
+    public void setDestinataireNom(String v) { destinataireNom = v; }
+    public String getDestinataireTelephone() { return destinataireTelephone; }
+    public void setDestinataireTelephone(String v) { destinataireTelephone = v; }
+    public BigDecimal getPoidsTotalKg() { return poidsTotalKg; }
+    public void setPoidsTotalKg(BigDecimal v) { poidsTotalKg = v; }
+    public StatutBon getStatut() { return statut; }
+    public void setStatut(StatutBon v) { statut = v; }
+    public String getTransportPreuveId() { return transportPreuveId; }
+    public void setTransportPreuveId(String v) { transportPreuveId = v; }
+    public String getRecepteur() { return recepteur; }
+    public void setRecepteur(String v) { recepteur = v; }
+    public OffsetDateTime getLivreLe() { return livreLe; }
+    public void setLivreLe(OffsetDateTime v) { livreLe = v; }
+    public String getCommentaire() { return commentaire; }
+    public void setCommentaire(String v) { commentaire = v; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public List<LigneBon> getLignes() { return lignes; }
 }

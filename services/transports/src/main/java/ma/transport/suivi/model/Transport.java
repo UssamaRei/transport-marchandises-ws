@@ -1,6 +1,12 @@
 package ma.transport.suivi.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -118,11 +124,14 @@ public class Transport {
         this.syncEtat = SyncEtat.OK;
     }
     private void exigerStatut(StatutTransport attendu) {
-        if (statut != attendu) throw new IllegalStateException("Statut attendu : " + attendu + ", obtenu : " + statut);
+        if (statut != attendu) {
+            throw new IllegalStateException("Statut attendu : " + attendu + ", obtenu : " + statut);
+        }
     }
     private static String texteRequis(String valeur, int max, String nom) {
-        if (valeur == null || valeur.isBlank() || valeur.length() > max)
+        if (valeur == null || valeur.isBlank() || valeur.length() > max) {
             throw new IllegalArgumentException(nom + " obligatoire, maximum " + max + " caractères");
+        }
         return valeur;
     }
     public String getId() { return id; }
