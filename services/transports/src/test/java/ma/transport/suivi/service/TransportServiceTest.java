@@ -29,6 +29,33 @@ class TransportServiceTest {
     private TransportService service;
 
     @Test
+    void refuseUnIdentifiantCamionContenantUnCaractereDeControle() {
+        ResponseStatusException error = assertThrows(ResponseStatusException.class,
+                () -> service.list("camion-\u0000", false, null, null, 0, 20));
+
+        assertEquals(HttpStatus.BAD_REQUEST, error.getStatusCode());
+        verifyNoInteractions(repository);
+    }
+
+    @Test
+    void refuseUneRechercheContenantUnCaractereDeControle() {
+        ResponseStatusException error = assertThrows(ResponseStatusException.class,
+                () -> service.list(null, false, null, "Agadir\u0000", 0, 20));
+
+        assertEquals(HttpStatus.BAD_REQUEST, error.getStatusCode());
+        verifyNoInteractions(repository);
+    }
+
+    @Test
+    void refuseUnIdentifiantTransportContenantUnCaractereDeControle() {
+        ResponseStatusException error = assertThrows(ResponseStatusException.class,
+                () -> service.getById("transport-\u0000"));
+
+        assertEquals(HttpStatus.BAD_REQUEST, error.getStatusCode());
+        verifyNoInteractions(repository);
+    }
+
+    @Test
     void consulterTransportExistant() {
         OffsetDateTime date = OffsetDateTime.parse("2026-11-15T10:00:00Z");
 

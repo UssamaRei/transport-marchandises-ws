@@ -85,7 +85,9 @@ public class BonService {
         BonLivraison bon = repository.findByIdForUpdate(id)
                 .orElseThrow(() -> new BonException(HttpStatus.NOT_FOUND, "Bon introuvable."));
         if (bon.getStatut() == StatutBon.LIVRE) {
-            if (memePreuve(bon, request)) return response(bon);
+            if (memePreuve(bon, request)) {
+                return response(bon);
+            }
             throw new BonException(HttpStatus.CONFLICT, "Une preuve différente est déjà enregistrée pour ce bon.");
         }
         bon.setTransportPreuveId(request.transportId());
@@ -102,9 +104,15 @@ public class BonService {
     }
 
     private void validerChargement(ChargementDetails source, String requestedId) {
-        if (source == null) throw new BonException(HttpStatus.BAD_GATEWAY, "Réponse vide du service Chargements.");
-        if (!requestedId.equals(source.id())) throw new BonException(HttpStatus.BAD_GATEWAY, "Identifiant incohérent dans la réponse Chargements.");
-        if (!"VALIDE".equals(source.statut())) throw new BonException(HttpStatus.CONFLICT, "Seul un chargement VALIDE peut produire un bon.");
+        if (source == null) {
+            throw new BonException(HttpStatus.BAD_GATEWAY, "Réponse vide du service Chargements.");
+        }
+        if (!requestedId.equals(source.id())) {
+            throw new BonException(HttpStatus.BAD_GATEWAY, "Identifiant incohérent dans la réponse Chargements.");
+        }
+        if (!"VALIDE".equals(source.statut())) {
+            throw new BonException(HttpStatus.CONFLICT, "Seul un chargement VALIDE peut produire un bon.");
+        }
         if (blank(source.origine()) || blank(source.destination()) || blank(source.destinataireNom())
                 || blank(source.camionSouhaiteId()) || source.poidsTotalKg() == null || source.poidsTotalKg().signum() <= 0
                 || source.poidsTotalKg().compareTo(new BigDecimal("99999999999.999")) > 0

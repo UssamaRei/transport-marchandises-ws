@@ -30,6 +30,9 @@ public class TransportService {
 
     @Transactional(readOnly = true)
     public TransportResponse getById(String id) {
+        if (containsControlCharacter(id)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Identifiant de transport invalide");
+        }
         Transport transport = repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
@@ -48,6 +51,12 @@ public class TransportService {
             int page,
             int size
     ) {
+        if (containsControlCharacter(camionId) || containsControlCharacter(recherche)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Les filtres ne doivent pas contenir de caractère de contrôle"
+            );
+        }
         if (page < 0 || size < 1 || size > 100) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -94,5 +103,9 @@ public class TransportService {
 
         return repository.findAll(filtres, pagination)
                 .map(TransportResponse::from);
+    }
+
+    private boolean containsControlCharacter(String value) {
+        return value != null && value.codePoints().anyMatch(Character::isISOControl);
     }
 }

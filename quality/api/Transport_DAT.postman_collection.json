@@ -1,0 +1,1668 @@
+{
+  "info": {
+    "name": "DAT — Transport — API des quatre services",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Collection exécutée sur quatre vrais services, PostgreSQL local et Keycloak. Les jetons proviennent d’un environnement privé ; seules les adresses isolées sont autorisées."
+  },
+  "variable": [
+    {
+      "key": "camionsUrl",
+      "value": "http://127.0.0.1:18081"
+    },
+    {
+      "key": "chargementsUrl",
+      "value": "http://127.0.0.1:18082"
+    },
+    {
+      "key": "bonsUrl",
+      "value": "http://127.0.0.1:18083"
+    },
+    {
+      "key": "transportsUrl",
+      "value": "http://127.0.0.1:18084"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const url = pm.variables.replaceIn(pm.request.url.toString());",
+          "if (!/^http:\\/\\/127\\.0\\.0\\.1:1808[1-4]\\/api\\/v1\\//.test(url)) throw new Error(\"Cette collection est réservée à la pile de test locale isolée.\");",
+          "if (!pm.collectionVariables.get(\"runId\")) {",
+          " const now=Date.now();",
+          " pm.collectionVariables.set(\"runId\",String(now));",
+          " pm.collectionVariables.set(\"plate\",\"DAT-\"+now);",
+          " pm.collectionVariables.set(\"startTime\",new Date(now).toISOString());",
+          " pm.collectionVariables.set(\"eventTime\",new Date(now+15*60*1000).toISOString());",
+          " pm.collectionVariables.set(\"arrivalTime\",new Date(now+30*60*1000).toISOString());",
+          " pm.collectionVariables.set(\"today\",new Date(now).toISOString().slice(0,10));",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "01 — Sécurité des quatre API",
+      "item": [
+        {
+          "name": "camions : accès sans jeton refusé",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{camionsUrl}}/api/v1/camions"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "camions : écriture LECTEUR refusée",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{readerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{camionsUrl}}/api/v1/camions",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "chargements : accès sans jeton refusé",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{chargementsUrl}}/api/v1/chargements"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "chargements : écriture LECTEUR refusée",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{readerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{chargementsUrl}}/api/v1/chargements",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "bons : accès sans jeton refusé",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{bonsUrl}}/api/v1/bons"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "bons : écriture LECTEUR refusée",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{readerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{bonsUrl}}/api/v1/bons",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "transports : accès sans jeton refusé",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{transportsUrl}}/api/v1/transports"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "transports : écriture LECTEUR refusée",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{readerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{transportsUrl}}/api/v1/transports",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 — Camions et réservations",
+      "item": [
+        {
+          "name": "Créer le camion de référence",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{camionsUrl}}/api/v1/camions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"immatriculation\": \"{{plate}}\", \"capaciteKg\": 1000}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "const d = pm.response.json();",
+                  "if (pm.response.code === 201) pm.collectionVariables.set(\"truckId\", d.id);",
+                  "pm.test(\"Capacité enregistrée\", () => pm.expect(d.capaciteKg).to.eql(1000));pm.test(\"Camion disponible\", () => pm.expect(d.disponible).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consulter le camion créé",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              }
+            ],
+            "url": "{{camionsUrl}}/api/v1/camions/{{truckId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"Même identifiant\", () => pm.expect(d.id).to.eql(pm.collectionVariables.get(\"truckId\")));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refuser une immatriculation en doublon",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{camionsUrl}}/api/v1/camions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"immatriculation\": \"{{plate}}\", \"capaciteKg\": 1000}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refuser une capacité nulle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{camionsUrl}}/api/v1/camions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"immatriculation\": \"{{plate}}-BAD\", \"capaciteKg\": 0}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 422\", () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Créer un camion trop petit pour le chargement",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{camionsUrl}}/api/v1/camions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"immatriculation\": \"{{plate}}-SMALL\", \"capaciteKg\": 100}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "const d = pm.response.json();",
+                  "if (pm.response.code === 201) pm.collectionVariables.set(\"smallTruckId\", d.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consulter la liste paginée des camions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              }
+            ],
+            "url": "{{camionsUrl}}/api/v1/camions?page=0&size=100"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"Liste paginée\",()=>pm.expect(d.items).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 — Préparation et validation du chargement",
+      "item": [
+        {
+          "name": "Créer un brouillon complet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{chargementsUrl}}/api/v1/chargements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"origine\": \"Agadir\", \"destination\": \"Fès\", \"destinataireNom\": \"Destinataire DAT fictif\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "const d = pm.response.json();",
+                  "if (pm.response.code === 201) pm.collectionVariables.set(\"loadingId\", d.id);",
+                  "pm.test(\"Statut brouillon\", () => pm.expect(d.statut).to.eql(\"BROUILLON\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refuser une ligne de quantité nulle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{chargementsUrl}}/api/v1/chargements/{{loadingId}}/lignes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"designation\": \"Cartons\", \"quantite\": 0, \"poidsUnitaireKg\": 25}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ajouter dix cartons de 25 kg",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{chargementsUrl}}/api/v1/chargements/{{loadingId}}/lignes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"designation\": \"Cartons DAT\", \"quantite\": 10, \"poidsUnitaireKg\": 25}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"Poids total = 250 kg\", () => pm.expect(Number(d.poidsTotalKg)).to.eql(250));pm.collectionVariables.set(\"lineId\",d.lignes[0].id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Modifier le poids unitaire à 30 kg",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{chargementsUrl}}/api/v1/chargements/{{loadingId}}/lignes/{{lineId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"designation\": \"Cartons DAT\", \"quantite\": 10, \"poidsUnitaireKg\": 30}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"Poids recalculé = 300 kg\", () => pm.expect(Number(d.poidsTotalKg)).to.eql(300));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refuser le camion de capacité insuffisante",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{chargementsUrl}}/api/v1/chargements/{{loadingId}}/validation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"camionId\": \"{{smallTruckId}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Vérifier que la surcharge conserve le brouillon",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              }
+            ],
+            "url": "{{chargementsUrl}}/api/v1/chargements/{{loadingId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"Brouillon inchangé\", () => pm.expect(d.statut).to.eql(\"BROUILLON\"));pm.test(\"Poids conservé\", () => pm.expect(Number(d.poidsTotalKg)).to.eql(300));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Valider avec le camion de 1 000 kg",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{chargementsUrl}}/api/v1/chargements/{{loadingId}}/validation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"camionId\": \"{{truckId}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"Chargement validé\", () => pm.expect(d.statut).to.eql(\"VALIDE\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rejouer la validation avec le même camion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{chargementsUrl}}/api/v1/chargements/{{loadingId}}/validation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"camionId\": \"{{truckId}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"Validation rejouable\", () => pm.expect(d.statut).to.eql(\"VALIDE\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refuser la modification du chargement validé",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{chargementsUrl}}/api/v1/chargements/{{loadingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"origine\": \"Rabat\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Vérifier les statistiques de chargements",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              }
+            ],
+            "url": "{{chargementsUrl}}/api/v1/chargements/statistiques"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"Statistiques cohérentes\",()=>pm.expect(d.total).to.be.at.least(1));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 — Bons de livraison",
+      "item": [
+        {
+          "name": "Émettre le bon à partir du chargement validé",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{bonsUrl}}/api/v1/bons",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"chargementId\": \"{{loadingId}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "const d = pm.response.json();",
+                  "if (pm.response.code === 201) pm.collectionVariables.set(\"bonId\", d.id);",
+                  "pm.test(\"Bon émis\", () => pm.expect(d.statut).to.eql(\"EMIS\"));pm.test(\"Snapshot du poids\", () => pm.expect(Number(d.poidsTotalKg)).to.eql(300));pm.test(\"Snapshot des lignes\",()=>pm.expect(d.lignes[0].designation).to.eql(\"Cartons DAT\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consulter le détail du bon",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              }
+            ],
+            "url": "{{bonsUrl}}/api/v1/bons/{{bonId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"Bon conservé\", () => pm.expect(d.statut).to.eql(\"EMIS\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refuser un deuxième bon pour le même chargement",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{bonsUrl}}/api/v1/bons",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"chargementId\": \"{{loadingId}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Lister les bons émis avec pagination",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              }
+            ],
+            "url": "{{bonsUrl}}/api/v1/bons?statut=EMIS&page=0&size=20"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"Liste de bons\",()=>pm.expect(d.content).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Autoriser la lecture technique de Chargements par Bons",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bonsToken}}"
+              }
+            ],
+            "url": "{{chargementsUrl}}/api/v1/chargements/{{loadingId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"Le compte technique lit le chargement\", () => pm.expect(d.statut).to.eql(\"VALIDE\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 — Transport et livraison complète",
+      "item": [
+        {
+          "name": "Planifier et réserver le camion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{transportsUrl}}/api/v1/transports",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bonId\": \"{{bonId}}\", \"camionId\": \"{{truckId}}\", \"departPrevu\": \"{{startTime}}\", \"operationKey\": \"dat:{{runId}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"transportId\", d.id);",
+                  "pm.test(\"Transport planifié\", () => pm.expect(d.statut).to.eql(\"PLANIFIE\"));pm.collectionVariables.set(\"reservationId\",d.reservationId);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rejouer la même planification sans doublon",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{transportsUrl}}/api/v1/transports",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bonId\": \"{{bonId}}\", \"camionId\": \"{{truckId}}\", \"departPrevu\": \"{{startTime}}\", \"operationKey\": \"dat:{{runId}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"Même transport\",()=>pm.expect(d.id).to.eql(pm.collectionVariables.get(\"transportId\")));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Vérifier que le camion est réservé",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              }
+            ],
+            "url": "{{camionsUrl}}/api/v1/camions/{{truckId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"Camion indisponible pendant le voyage\", () => pm.expect(d.disponible).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refuser une arrivée avant le départ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{transportsUrl}}/api/v1/transports/{{transportId}}/arrivee",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"arriveeReelle\": \"{{arrivalTime}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Enregistrer le départ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{transportsUrl}}/api/v1/transports/{{transportId}}/depart",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"departReel\": \"{{startTime}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"Transport en cours\", () => pm.expect(d.statut).to.eql(\"EN_COURS\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ajouter un pointage de suivi",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{transportsUrl}}/api/v1/transports/{{transportId}}/evenements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"type\": \"POINTAGE\", \"description\": \"Pointage DAT fictif\", \"dateEvenement\": \"{{eventTime}}\", \"latitude\": 33.57, \"longitude\": -7.59}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Enregistrer l’arrivée",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{transportsUrl}}/api/v1/transports/{{transportId}}/arrivee",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"arriveeReelle\": \"{{arrivalTime}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"En attente de confirmation\", () => pm.expect(d.statut).to.eql(\"CLOTURE_EN_ATTENTE\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Confirmer la livraison et libérer le camion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{transportsUrl}}/api/v1/transports/{{transportId}}/livraison",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"receptionnaire\": \"Réceptionnaire DAT fictif\", \"dateReception\": \"{{today}}\", \"commentaire\": \"Réception complète de dix cartons.\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"Transport livré\", () => pm.expect(d.statut).to.eql(\"LIVRE\"));pm.test(\"Preuve confirmée\", () => pm.expect(d.preuveConfirmee).to.eql(true));pm.test(\"Libération confirmée\", () => pm.expect(d.liberationConfirmee).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rejouer la même livraison sans doublon",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{transportsUrl}}/api/v1/transports/{{transportId}}/livraison",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"receptionnaire\": \"Réceptionnaire DAT fictif\", \"dateReception\": \"{{today}}\", \"commentaire\": \"Réception complète de dix cartons.\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"Confirmation conservée\", () => pm.expect(d.statut).to.eql(\"LIVRE\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refuser une preuve différente après livraison",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{transportsUrl}}/api/v1/transports/{{transportId}}/livraison",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"receptionnaire\": \"Réceptionnaire DAT fictif\", \"dateReception\": \"{{today}}\", \"commentaire\": \"Contenu différent\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Vérifier la preuve officielle dans Bons",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              }
+            ],
+            "url": "{{bonsUrl}}/api/v1/bons/{{bonId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"Bon livré\", () => pm.expect(d.statut).to.eql(\"LIVRE\"));pm.test(\"Preuve liée au transport\",()=>pm.expect(d.transportId).to.eql(pm.collectionVariables.get(\"transportId\")));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Vérifier le camion disponible après livraison",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              }
+            ],
+            "url": "{{camionsUrl}}/api/v1/camions/{{truckId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"Camion libéré\", () => pm.expect(d.disponible).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consulter les trois événements du trajet",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              }
+            ],
+            "url": "{{transportsUrl}}/api/v1/transports/{{transportId}}/evenements"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"Départ, pointage et arrivée\",()=>pm.expect(d.content.map(x=>x.type)).to.have.members([\"DEPART\",\"POINTAGE\",\"ARRIVEE\"]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Relire le transport clôturé",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{agentToken}}"
+              }
+            ],
+            "url": "{{transportsUrl}}/api/v1/transports/{{transportId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test(\"État final cohérent\", () => pm.expect(d.statut).to.eql(\"LIVRE\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
